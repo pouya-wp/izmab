@@ -1,0 +1,98 @@
+import assert from 'node:assert/strict'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { chromium } from 'playwright-core'
+
+const base = process.env.IZMAB_URL || 'http://127.0.0.1:4173/'
+const browser = await chromium.launch({ channel: 'chrome', headless: true })
+const failures = []
+
+try {
+  for (const language of ['en', 'fa', 'hy', 'ru']) {
+    const context = await browser.newContext({
+      viewport: { width: language === 'en' ? 1440 : 390, height: language === 'en' ? 900 : 844 },
+      reducedMotion: 'reduce',
+      deviceScaleFactor: 1,
+    })
+    const page = await context.newPage()
+    page.on('pageerror', error => failures.push(`${language}: ${error.message}`))
+    await page.goto(`${base}?lang=${language}`, { waitUntil: 'networkidle' })
+    await page.evaluate(() => document.fonts.ready)
+    assert.equal(await page.locator('html').getAttribute('lang'), language)
+    assert.equal(await page.locator('html').getAttribute('dir'), language === 'fa' ? 'rtl' : 'ltr')
+    assert.equal(await page.locator('.site-header').count(), 1)
+    assert.equal(await page.locator('.gift-signature span').first().textContent(), 'A gift From Bro')
+    assert.equal(await page.locator('.gift-signature span').last().textContent(), 'happy emigration')
+    assert.equal(await page.locator('.lens-room').count(), 0, 'Removed section still present')
+    assert.equal(await page.locator('.eye-loader').count(), 0, 'Removed eye loader still present')
+    assert.equal(await page.locator('.neon-section').count(), 1)
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    assert.ok(overflow <= 2, `${language}: horizontal overflow ${overflow}px`)
+
+    await page.screenshot({ path: join(tmpdir(), `izmab-qa-${language}-hero.png`) })
+    await page.locator('#gift').scrollIntoViewIfNeeded()
+    await page.screenshot({ path: join(tmpdir(), `izmab-qa-${language}-gift.png`) })
+    assert.ok(await page.locator('.ticket-route').innerText())
+    if (language === 'en') {
+      await page.locator('.menu-toggle').click()
+      assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'true')
+      await page.locator('.menu-links a').first().click()
+      assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'false')
+    }
+    await context.close()
+    process.stdout.write(`${language}: layout, translation, gift, footer OK\n`)
+  }
+
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'no-preference' })
+  const page = await context.newPage()
+  page.on('pageerror', error => failures.push(`motion: ${error.message}`))
+  await page.goto(base, { waitUntil: 'networkidle' })
+  await page.waitForTimeout(1200)
+  assert.equal(await page.locator('.eye-loader').count(), 0, 'Removed eye loader still present')
+  const hasCanvas = await page.locator('.film-atmosphere canvas').count()
+  assert.ok(hasCanvas, 'Water atmosphere did not initialize')
+  assert.ok(await page.locator('.depth-canvas').count(), 'Portrait depth canvas did not initialize')
+  assert.ok(await page.locator('.hero-light-canvas canvas').count(), 'Global 3D cursor did not initialize')
+  await page.screenshot({ path: join(tmpdir(), 'izmab-qa-motion.png') })
+  await page.mouse.click(720, 430)
+  await page.waitForTimeout(220)
+  await page.screenshot({ path: join(tmpdir(), 'izmab-qa-ripple.png') })
+  await page.locator('.neon-section').scrollIntoViewIfNeeded()
+  await page.waitForTimeout(1500)
+  assert.ok(await page.locator('.neon-stage canvas').count(), '3D neon sign did not initialize')
+  await page.screenshot({ path: join(tmpdir(), 'izmab-qa-neon.png') })
+  await page.locator('.menu-toggle').click()
+  await page.waitForTimeout(1100)
+  await page.locator('.menu-links a').nth(2).hover()
+  await page.waitForTimeout(420)
+  await page.screenshot({ path: join(tmpdir(), 'izmab-qa-menu.png') })
+  assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'true')
+  await page.locator('.menu-toggle').click()
+  await page.locator('.language-control select').selectOption('hy')
+  await page.waitForTimeout(330)
+  await page.screenshot({ path: join(tmpdir(), 'izmab-qa-flag.png') })
+  await page.waitForTimeout(520)
+  assert.equal(await page.locator('html').getAttribute('lang'), 'hy', 'Language did not commit during flag transition')
+  await page.waitForTimeout(1100)
+  assert.equal(await page.locator('.language-transition').count(), 0, 'Flag transition did not finish')
+  await page.locator('.language-control select').selectOption('en')
+  await page.waitForTimeout(260)
+  assert.equal(await page.locator('.language-union-jack svg').count(), 1, 'English transition is not the Union Jack')
+  await page.waitForTimeout(1600)
+  await page.locator('body').click({ position: { x: 70, y: 400 } })
+  await context.close()
+  const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'no-preference', deviceScaleFactor: 1 })
+  const mobilePage = await mobile.newPage()
+  mobilePage.on('pageerror', error => failures.push(`mobile: ${error.message}`))
+  await mobilePage.goto(`${base}?lang=fa`, { waitUntil: 'networkidle' })
+  await mobilePage.waitForTimeout(1000)
+  assert.equal(await mobilePage.locator('.eye-loader').count(), 0, 'Removed mobile eye loader still present')
+  assert.ok(await mobilePage.locator('.depth-canvas').count(), 'Mobile portrait depth canvas did not initialize')
+  assert.ok((await mobilePage.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)) <= 2, 'Mobile horizontal overflow')
+  await mobilePage.screenshot({ path: join(tmpdir(), 'izmab-qa-mobile-motion.png') })
+  await mobile.close()
+  assert.deepEqual(failures, [])
+  process.stdout.write('motion: global cursor, water, 3D neon, menu, Union Jack transition and mobile; no page errors\n')
+} finally {
+  await browser.close()
+}
