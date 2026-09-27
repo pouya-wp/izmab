@@ -121,7 +121,7 @@ function moveMarkBlur(mark: HTMLElement | null, clientX: number, clientY: number
 function Hero({ copy, markRef, portraitRef, reduced }: { copy: LocaleText; markRef: RefObject<HTMLDivElement | null>; portraitRef: RefObject<HTMLDivElement | null>; reduced: boolean }) {
   return <section id="top" className="hero hero-v2" onPointerMove={event => { if (!reduced && event.pointerType !== 'touch') moveMarkBlur(markRef.current, event.clientX, event.clientY) }} onPointerLeave={() => markRef.current?.classList.remove('is-blurring')}>
     <div className="hero-glow" aria-hidden="true" />
-    <div className="hero-mark hover-blur-mark" ref={markRef}><img className="hover-blur-base" src={asset('izmab-wordmark.svg')} alt="IZMAB" /><img className="hover-blur-copy" src={asset('izmab-wordmark.svg')} alt="" aria-hidden="true" /></div>
+    <div className="hero-mark hover-blur-mark" ref={markRef}><img className="hover-blur-base" src={asset('izmab-wordmark.svg')} alt="IZMAB" /><span className="hover-blur-layer" aria-hidden="true"><img src={asset('izmab-wordmark.svg')} alt="" /></span></div>
     <DepthPortrait portraitRef={portraitRef} reduced={reduced} />
     <div className="hero-shade" aria-hidden="true" />
     <div className="hero-copy"><p className="eyebrow" data-hero-copy>{copy.heroKicker}</p><p data-hero-copy>{copy.heroCopy}</p></div>
@@ -251,7 +251,7 @@ function Gift({ copy, play }: { copy: LocaleText; play: (cue: SoundCue) => void 
 
 function Footer({ copy }: { copy: LocaleText }) {
   const markRef = useRef<HTMLAnchorElement>(null)
-  return <footer className="footer footer-v2"><a className="hover-blur-mark footer-mark" ref={markRef} href="#top" aria-label={copy.backToTop} data-cursor="link" onPointerMove={event => { if (event.pointerType !== 'touch') moveMarkBlur(markRef.current, event.clientX, event.clientY) }} onPointerLeave={() => markRef.current?.classList.remove('is-blurring')}><img className="hover-blur-base" src={asset('izmab-wordmark.svg')} alt="IZMAB" loading="lazy" /><img className="hover-blur-copy" src={asset('izmab-wordmark.svg')} alt="" aria-hidden="true" loading="lazy" /></a>
+  return <footer className="footer footer-v2"><a className="hover-blur-mark footer-mark" ref={markRef} href="#top" aria-label={copy.backToTop} data-cursor="link" onPointerMove={event => { if (event.pointerType !== 'touch') moveMarkBlur(markRef.current, event.clientX, event.clientY) }} onPointerLeave={() => markRef.current?.classList.remove('is-blurring')}><img className="hover-blur-base" src={asset('izmab-wordmark.svg')} alt="IZMAB" loading="lazy" /><span className="hover-blur-layer" aria-hidden="true"><img src={asset('izmab-wordmark.svg')} alt="" loading="lazy" /></span></a>
     <div className="gift-signature"><span>A gift From Bro</span><span>happy emigration</span></div>
     <div className="footer-bottom eyebrow"><span>© {new Date().getFullYear()} IZMAB — {copy.footerRole}</span><a href="#top" data-cursor="link">↑ {copy.backToTop}</a></div>
   </footer>
