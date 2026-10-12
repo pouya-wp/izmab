@@ -29,14 +29,14 @@ export const Iris = forwardRef<IrisHandle, { label: string }>(function Iris({ la
   useEffect(() => { setOpen(1) }, [])
   return <svg className="iris" viewBox="0 0 400 400" role="img" aria-label={label}>
     <defs>
-      <radialGradient id="iris-glow"><stop offset="0" stopColor="#ff2a55" /><stop offset=".35" stopColor="#a1001f" /><stop offset="1" stopColor="#120004" /></radialGradient>
-      <linearGradient id="iris-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#2a2a2e" /><stop offset=".45" stopColor="#0d0d0f" /><stop offset=".55" stopColor="#1b1b1f" /><stop offset="1" stopColor="#060607" /></linearGradient>
+      <radialGradient id="iris-glow"><stop offset="0" stopColor="#f0a27a" /><stop offset=".3" stopColor="#c2412b" /><stop offset=".75" stopColor="#3a120c" /><stop offset="1" stopColor="#140806" /></radialGradient>
+      <linearGradient id="iris-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#2b2724" /><stop offset=".45" stopColor="#0f0e0d" /><stop offset=".55" stopColor="#1d1a18" /><stop offset="1" stopColor="#080707" /></linearGradient>
     </defs>
     <circle cx={C} cy={C} r={R} fill="url(#iris-glow)" />
     <path ref={fill} fill="url(#iris-metal)" fillRule="evenodd" />
-    <path ref={edges} fill="none" stroke="rgba(244,241,238,.22)" strokeWidth="1.2" />
-    <circle cx={C} cy={C} r={R} fill="none" stroke="rgba(244,241,238,.3)" strokeWidth="1" />
-    <circle cx={C} cy={C} r={R + 7} fill="none" stroke="rgba(244,241,238,.12)" strokeWidth="6" strokeDasharray="1.5 6" />
+    <path ref={edges} fill="none" stroke="rgba(236,230,220,.2)" strokeWidth="1.2" />
+    <circle cx={C} cy={C} r={R} fill="none" stroke="rgba(236,230,220,.28)" strokeWidth="1" />
+    <circle cx={C} cy={C} r={R + 7} fill="none" stroke="rgba(236,230,220,.1)" strokeWidth="6" strokeDasharray="1.5 6" />
   </svg>
 })
 

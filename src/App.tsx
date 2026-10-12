@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import { useSoundDesign, type SoundCue } from './useSoundDesign'
-import DepthPortrait from './DepthPortrait'
 import LanguageTransition from './LanguageTransition'
-import NeonSign from './NeonSign'
 import SceneCanvas from './SceneCanvas'
-import { Grain, Preloader, RunningTimecode, TimelineHud, ViewfinderCursor, ZoneClock, scroller, scrollToY } from './Chrome'
+import { Preloader, SoftCursor, ZoneClock, scroller, scrollToY } from './Chrome'
+import { LensMark } from './LensMark'
 import { Iris, Lines, Odometer, type IrisHandle } from './Bits'
 import { languageNames, languageTags, text, type Language, type LocaleText } from './i18n'
 import { extra, type ExtraText } from './i18n-extra'
@@ -19,7 +18,6 @@ gsap.registerPlugin(ScrollTrigger)
 type Copy = LocaleText & ExtraText
 type Play = (cue: SoundCue) => void
 const asset = (name: string) => `/${name}`
-const hudIds = ['top', 'manifesto', 'work', 'reel', 'about', 'process', 'pricing', 'journal', 'contact', 'gift', 'credits']
 const menuIds = ['work', 'reel', 'about', 'process', 'pricing', 'journal', 'contact']
 const ratios = [2.39, 4 / 5, 16 / 9, 9 / 16, 3 / 2, 16 / 9]
 const postDates = ['2026-08-14', '2026-07-02', '2026-05-19']
@@ -46,21 +44,6 @@ function useInView<T extends Element>(ref: RefObject<T | null>, margin = '0px 0p
     return () => io.disconnect()
   }, [ref, margin, seen])
   return seen
-}
-
-/** Mounts heavy children (WebGL) only once they come within a screen or so of the viewport. */
-function NearViewport({ children, className }: { children: React.ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const near = useInView(ref, '120% 0px 120% 0px')
-  return <div ref={ref} className={className}>{near ? children : null}</div>
-}
-
-function moveMarkBlur(mark: HTMLElement | null, clientX: number, clientY: number) {
-  if (!mark) return
-  const rect = mark.getBoundingClientRect()
-  mark.style.setProperty('--blur-x', `${clientX - rect.left}px`)
-  mark.style.setProperty('--blur-y', `${clientY - rect.top}px`)
-  mark.classList.add('is-blurring')
 }
 
 /* ───────────────────────────── Header & menu ───────────────────────────── */
@@ -90,6 +73,7 @@ function Header({ copy, language, setLanguage, soundEnabled, toggleSound, play, 
   }, [open, reduced])
   useEffect(() => {
     if (open) scroller.lenis?.stop(); else scroller.lenis?.start()
+    document.documentElement.classList.toggle('menu-open', open)
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape' && open) { setOpen(false); button.current?.focus() } }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -97,19 +81,19 @@ function Header({ copy, language, setLanguage, soundEnabled, toggleSound, play, 
   const close = () => { setOpen(false); play('transition') }
   return <>
     <header className="hdr">
-      <a className="hdr-logo" href="#top" aria-label="IZMAB" data-cursor-label="TOP"><span>IZMAB</span><small className="eyebrow">{copy.footerRole}</small></a>
-      <a className="hdr-status eyebrow" href="#contact"><span className="dot" /><span>{copy.available}</span></a>
+      <a className="hdr-logo" href="#top" aria-label="IZMAB"><span>IZMAB</span></a>
+      <a className="hdr-status" href="#contact"><span className="dot" /><span>{copy.available}</span></a>
       <div className="hdr-controls">
-        <label className="pill pill-lang eyebrow">
+        <label className="pill pill-lang">
           <span className="visually-hidden">{copy.languageLabel}</span>
           <select aria-label={copy.languageLabel} value={language} onChange={event => { setLanguage(event.target.value as Language); play('transition') }}>
             {(Object.keys(languageNames) as Language[]).map(code => <option key={code} value={code}>{code.toUpperCase()} · {languageNames[code]}</option>)}
           </select>
         </label>
-        <button className={`pill pill-sound eyebrow ${soundEnabled ? 'is-on' : ''}`} type="button" onClick={toggleSound} aria-label={soundEnabled ? copy.soundOn : copy.soundOff} aria-pressed={soundEnabled}>
+        <button className={`pill pill-sound ${soundEnabled ? 'is-on' : ''}`} type="button" onClick={toggleSound} aria-label={soundEnabled ? copy.soundOn : copy.soundOff} aria-pressed={soundEnabled}>
           <span className="sound-bars" aria-hidden="true"><i /><i /><i /><i /></span><span className="pill-word">{copy.soundLabel}</span>
         </button>
-        <button ref={button} className={`pill pill-menu eyebrow ${open ? 'is-open' : ''}`} type="button" onClick={() => { setOpen(value => !value); play('transition') }} aria-expanded={open} aria-controls="site-menu" data-magnetic>
+        <button ref={button} className={`pill pill-menu ${open ? 'is-open' : ''}`} type="button" onClick={() => { setOpen(value => !value); play('transition') }} aria-expanded={open} aria-controls="site-menu" data-magnetic>
           <span>{open ? copy.close : copy.menu}</span><span className="burger" aria-hidden="true"><i /><i /></span>
         </button>
       </div>
@@ -117,20 +101,19 @@ function Header({ copy, language, setLanguage, soundEnabled, toggleSound, play, 
     <nav ref={panel} id="site-menu" className="menu" aria-label={copy.menu} aria-hidden={!open} style={{ visibility: 'hidden' }}>
       <div className="menu-grid">
         <div className="menu-list">
-          <div className="menu-top eyebrow menu-fade"><span>IZMAB / {copy.menu}</span><span>01—07</span></div>
+          <div className="menu-top label menu-fade"><span>{copy.menu}</span><span>{copy.footerRole}</span></div>
           <ol className="menu-links">
             {menuIds.map((id, index) => <li key={id}><a className={`menu-item ${hover === index ? 'is-active' : ''}`} href={`#${id}`} onClick={close} onPointerEnter={() => setHover(index)} onFocus={() => setHover(index)} tabIndex={open ? 0 : -1}>
-              <span className="menu-link"><span className="eyebrow">{pad(index + 1)}</span><span className="menu-title">{copy.nav[index]}</span><span className="menu-arrow" aria-hidden="true">↗</span></span>
+              <span className="menu-link"><span className="menu-no">{pad(index + 1)}</span><span className="menu-title">{copy.nav[index]}</span><span className="menu-arrow" aria-hidden="true">↗</span></span>
             </a></li>)}
           </ol>
-          <div className="menu-meta eyebrow menu-fade"><a href="mailto:hello@izmab.studio" tabIndex={open ? 0 : -1}>hello@izmab.studio</a><span>IZMAB · 2026</span></div>
+          <div className="menu-meta label menu-fade"><a href="mailto:hello@izmab.studio" tabIndex={open ? 0 : -1}>hello@izmab.studio</a><span>IZMAB · 2026</span></div>
         </div>
         <div className="menu-stage menu-fade" aria-hidden="true">
-          <div className="menu-stage-frame"><i /><i /><i /><i />
-            <span className="menu-stage-rec eyebrow"><b />REC · {pad(hover + 1)} / 07</span>
+          <div className="menu-stage-frame">
             <strong className="menu-stage-num" key={`n${hover}`}>{pad(hover + 1)}</strong>
             <span className="menu-stage-title serif" key={`t${language}${hover}`}>{copy.nav[hover]}</span>
-            <span className="menu-stage-foot eyebrow">{copy.sections[hover === 6 ? 7 : hover]}</span>
+            <span className="menu-stage-foot label">{copy.sections[hover === 6 ? 7 : hover]}</span>
           </div>
         </div>
       </div>
@@ -140,51 +123,22 @@ function Header({ copy, language, setLanguage, soundEnabled, toggleSound, play, 
 
 /* ───────────────────────────── Hero: the viewfinder ───────────────────────────── */
 
-const fStops = ['1.4', '2', '2.8', '4', '5.6', '8']
 function Hero({ copy, started, reduced }: { copy: Copy; started: boolean; reduced: boolean }) {
   const root = useRef<HTMLElement>(null)
   const frame = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
   const mark = useRef<HTMLDivElement>(null)
   const portrait = useRef<HTMLDivElement>(null)
-  const focus = useRef<HTMLDivElement>(null)
-  const fstop = useRef<HTMLSpanElement>(null)
-  const kelvin = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    const node = root.current
-    if (!node || reduced) return
-    const target = { x: innerWidth * .5, y: innerHeight * .42 }, pos = { ...target }
-    let frameId = 0
-    const move = (event: PointerEvent) => {
-      const rect = node.getBoundingClientRect()
-      if (event.clientY > rect.bottom || event.clientY < rect.top) return
-      target.x = event.clientX - rect.left; target.y = event.clientY - rect.top
-      if (fstop.current) fstop.current.textContent = `f/${fStops[Math.min(fStops.length - 1, Math.floor(target.x / rect.width * fStops.length))]}`
-      if (kelvin.current) kelvin.current.textContent = `${3200 + Math.round((1 - target.y / rect.height) * 30) * 100}K`
-      if (event.pointerType !== 'touch') moveMarkBlur(mark.current, event.clientX, event.clientY)
-    }
-    const tick = () => {
-      frameId = requestAnimationFrame(tick)
-      pos.x += (target.x - pos.x) * .09; pos.y += (target.y - pos.y) * .09
-      if (focus.current) focus.current.style.transform = `translate3d(${pos.x}px,${pos.y}px,0) translate(-50%,-50%)`
-    }
-    frameId = requestAnimationFrame(tick)
-    node.addEventListener('pointermove', move)
-    const leave = () => mark.current?.classList.remove('is-blurring')
-    node.addEventListener('pointerleave', leave)
-    return () => { cancelAnimationFrame(frameId); node.removeEventListener('pointermove', move); node.removeEventListener('pointerleave', leave) }
-  }, [reduced])
 
   useEffect(() => {
     if (!started || reduced) return
     const context = gsap.context(() => {
       gsap.timeline({ defaults: { ease: 'expo.out' } })
         .fromTo(inner.current, { clipPath: 'inset(50% 0% 50% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'expo.inOut' })
-        .fromTo(mark.current, { yPercent: 18, scale: 1.12, opacity: 0 }, { yPercent: 0, scale: 1, opacity: 1, duration: 1.8 }, .35)
-        .fromTo(portrait.current, { yPercent: 12, scale: 1.06, opacity: 0 }, { yPercent: 0, scale: 1, opacity: 1, duration: 1.8 }, .5)
+        .fromTo(mark.current, { yPercent: 18, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.8 }, .35)
+        .fromTo(portrait.current, { yPercent: 8, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.8 }, .5)
         .fromTo('.hero .line-inner', { yPercent: 110 }, { yPercent: 0, duration: 1.3, stagger: .08 }, .9)
-        .fromTo('.hero [data-hud]', { opacity: 0 }, { opacity: 1, duration: .6, stagger: .06, ease: 'power2.out' }, 1.1)
+        .fromTo('.hero-fade', { opacity: 0 }, { opacity: 1, duration: .8, ease: 'power2.out' }, 1.2)
     }, root)
     return () => context.revert()
   }, [started, reduced])
@@ -193,10 +147,10 @@ function Hero({ copy, started, reduced }: { copy: Copy; started: boolean; reduce
     if (reduced) return
     const context = gsap.context(() => {
       const st = { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true }
-      gsap.to(frame.current, { clipPath: 'inset(9% 5% 9% 5% round 28px)', ease: 'none', scrollTrigger: st })
-      gsap.to(mark.current, { yPercent: 40, ease: 'none', scrollTrigger: st })
-      gsap.to(portrait.current, { scale: .94, yPercent: 4, ease: 'none', scrollTrigger: st })
-      gsap.to('.hero-copy', { yPercent: -60, opacity: 0, ease: 'none', scrollTrigger: { ...st, end: '60% top' } })
+      gsap.to(frame.current, { clipPath: 'inset(6% 4% 6% 4% round 20px)', ease: 'none', scrollTrigger: st })
+      gsap.to(mark.current, { yPercent: 35, ease: 'none', scrollTrigger: st })
+      gsap.to(portrait.current, { scale: .96, ease: 'none', scrollTrigger: st })
+      gsap.to('.hero-copy', { yPercent: -40, opacity: 0, ease: 'none', scrollTrigger: { ...st, end: '55% top' } })
     }, root)
     return () => context.revert()
   }, [reduced])
@@ -205,22 +159,14 @@ function Hero({ copy, started, reduced }: { copy: Copy; started: boolean; reduce
     <div className="hero-frame" ref={frame}>
       <div className="hero-inner" ref={inner}>
         <div className="hero-glow" aria-hidden="true" />
-        <div className="hero-mark hover-blur-mark" ref={mark}><img className="hover-blur-base" src={asset('izmab-wordmark.svg')} alt="IZMAB" /><span className="hover-blur-layer" aria-hidden="true"><img src={asset('izmab-wordmark.svg')} alt="" /></span></div>
-        <DepthPortrait portraitRef={portrait} reduced={reduced} />
+        <div className="hero-mark" ref={mark}><LensMark enabled={!reduced} /></div>
+        <div className="hero-portrait-shell" ref={portrait}><div className="hero-cutout"><img className="hero-portrait" src={asset('portrait.jpeg')} alt={copy.portraitCaption} fetchPriority="high" /></div></div>
         <div className="hero-shade" aria-hidden="true" />
-        <div className="vf-frame" aria-hidden="true">
-          <i data-hud /><i data-hud /><i data-hud /><i data-hud />
-          <span className="vf-rec eyebrow" data-hud><b />REC <RunningTimecode /></span>
-          <span className="vf-spec eyebrow" data-hud>4K · 24 FPS · LOG-C</span>
-          <span className="vf-exp eyebrow" data-hud><span>ISO 800</span><span>1/48</span><span ref={fstop}>f/2.8</span><span ref={kelvin}>5600K</span></span>
-          <span className="vf-meter" data-hud>{Array.from({ length: 21 }, (_, i) => <i key={i} className={i === 10 ? 'mid' : ''} />)}</span>
-        </div>
-        {!reduced && <div className="vf-focus" ref={focus} aria-hidden="true"><i /><i /><i /><i /><span className="eyebrow">AF·C</span></div>}
         <div className="hero-copy">
           <h1 className="hero-line"><Lines lines={copy.heroLine} accent={1} /></h1>
-          <p className="hero-kicker"><span className="line"><span className="line-inner">{copy.heroCopy}</span></span></p>
+          <p className="hero-kicker hero-fade">{copy.heroCopy}</p>
         </div>
-        <a className="hero-scroll eyebrow" href="#manifesto" data-hud><span className="hero-scroll-bar" />{copy.scroll}</a>
+        <a className="hero-scroll hero-fade" href="#manifesto"><span className="hero-scroll-bar" />{copy.scroll}</a>
       </div>
     </div>
   </section>
@@ -238,8 +184,8 @@ function Manifesto({ copy, reduced }: { copy: Copy; reduced: boolean }) {
     }, ref)
     return () => context.revert()
   }, [reduced, copy.manifesto])
-  return <section id="manifesto" className="manifesto" ref={ref}>
-    <div className="manifesto-head eyebrow"><span><b className="dot" /> 00 — {copy.chapters[1]}</span><span>{copy.heroKicker}</span></div>
+  return <section id="manifesto" className="manifesto theme-paper" ref={ref}>
+    <div className="manifesto-head"><span className="label">{copy.chapters[1]}</span><span className="manifesto-aside">{copy.heroKicker}</span></div>
     <p className="manifesto-text">{words.map((word, i) => <span key={i} className={`mf-word ${copy.manifestoAccent.includes(word) ? 'serif accent' : ''}`}>{word} </span>)}</p>
   </section>
 }
@@ -259,15 +205,15 @@ function Marquee({ items, reduced }: { items: string[]; reduced: boolean }) {
         if (!row) return
         const half = row.scrollWidth / 2
         const value = ((i ? -x : x) % half + half) % half
-        row.style.transform = `translate3d(${-value}px,0,0) skewX(${(i ? 1 : -1) * Math.min(12, velocity * .4) * direction}deg)`
+        row.style.transform = `translate3d(${-value}px,0,0)`
       })
     }
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
   }, [reduced])
   const doubled = [...items, ...items, ...items, ...items]
-  return <div className="marquee" aria-label={items.join(', ')} dir="ltr">
-    {[0, 1].map(row => <div className={`marquee-row ${row ? 'is-outline' : ''}`} key={row} ref={el => { rows.current[row] = el }} aria-hidden="true">
+  return <div className="marquee theme-paper" aria-label={items.join(', ')} dir="ltr">
+    {[0].map(row => <div className={`marquee-row ${row ? 'is-outline' : ''}`} key={row} ref={el => { rows.current[row] = el }} aria-hidden="true">
       {doubled.map((item, i) => <span key={i}>{item}<i className={i % 2 ? 'star' : 'disc'} /></span>)}
     </div>)}
   </div>
@@ -330,30 +276,23 @@ function Work({ copy, reduced, play }: { copy: Copy; reduced: boolean; play: Pla
   const project = projects[active]
   return <section id="work" className={`work ${reduced ? 'is-static' : ''}`} ref={wrap} style={reduced ? undefined : { height: `${projects.length * 80 + 60}vh` }}>
     <div className="work-sticky">
-      <div className="work-head eyebrow"><span>01 — {copy.sections[0]}</span><span className="work-hint">{copy.workHint}</span><span className="accent">{pad(active + 1, 3)} / {pad(projects.length, 3)}</span></div>
+      <div className="work-head"><span className="label">{copy.sections[0]}</span><span className="work-hint label">{copy.workHint}</span><span className="work-count">{pad(active + 1)}<span>/{pad(projects.length)}</span></span></div>
       <div className="work-stage">
         <ol className="work-index">
-          {projects.map((p, i) => <li key={p.number}><button type="button" className={i === active ? 'is-active' : ''} onClick={() => go(i)} aria-current={i === active} data-cursor-label="CUT">
-            <span className="eyebrow">{p.number}</span><span className="work-index-title">{p.title}</span><span className="eyebrow work-index-format">{p.format}</span>
+          {projects.map((p, i) => <li key={p.number}><button type="button" className={i === active ? 'is-active' : ''} onClick={() => go(i)} aria-current={i === active}>
+            <span className="work-index-no">{p.number.slice(1)}</span><span className="work-index-title">{p.title}</span><span className="work-index-format">{p.format}</span>
           </button></li>)}
         </ol>
         <div className="work-box" ref={box}>
-          <div className="work-ghost" aria-hidden="true">{project.number}</div>
           <div className="work-frame" ref={frame} data-cursor data-cursor-label={project.format}>
             <SceneCanvas scene={active} reduced={reduced} />
-            <div className="frame-hud" aria-hidden="true"><i /><i /><i /><i />
-              <span className="fh-tl eyebrow"><b />REC <RunningTimecode offset={active * 37} /></span>
-              <span className="fh-tr eyebrow accent">{project.format}</span>
-              <span className="fh-bl eyebrow">{project.number} · {copy.projectKinds[active]}</span>
-              <span className="fh-br eyebrow">{copy.workPlaceholder}</span>
-              <span className="fh-cross" />
-            </div>
+            <span className="frame-tag">{project.format}</span>
           </div>
         </div>
       </div>
       <div className="work-foot">
         <h3 className="work-title" ref={title} key={active} aria-live="polite">{[...project.title].map((c, i) => <span className="ch-mask" key={i}><span className="ch">{c === ' ' ? ' ' : c}</span></span>)}</h3>
-        <div className="work-meta eyebrow"><span>{copy.projectKinds[active]}</span><span>{project.meta.slice(-4)}</span><span className="accent">{project.format}</span></div>
+        <div className="work-meta"><span>{copy.projectKinds[active]}</span><span>{project.meta.slice(-4)}</span><span className="muted">{copy.workPlaceholder}</span></div>
       </div>
       <span className="work-progress"><span ref={bar} /></span>
     </div>
@@ -382,19 +321,17 @@ function Reel({ copy, reduced }: { copy: Copy; reduced: boolean }) {
     <div className="reel-pin" style={reduced ? undefined : { height: '240vh' }}>
       <div className="reel-sticky">
         <div className="reel-words" aria-hidden="true"><span className="reel-word a">{first}</span><span className="reel-word b serif">{rest.join(' ') || copy.reelLabel}</span></div>
-        <div className="reel-frame" data-cursor data-cursor-label="SOON">
+        <div className="reel-frame" data-cursor data-cursor-label="Soon">
           <SceneCanvas scene={2} montage reduced={reduced} />
           <div className="reel-overlay">
-            <span className="reel-tl eyebrow"><b />{copy.teaser} · <RunningTimecode /></span>
-            <span className="reel-tr eyebrow">02 / {copy.reelLabel}</span>
-            <div className="reel-center"><span className="reel-play" aria-hidden="true"><i /></span><span className="eyebrow">{copy.reelPlaceholder}</span></div>
-            <span className="reel-bl eyebrow">4K · 24 FPS · 2.39:1</span>
+            <div className="reel-center"><span className="reel-play" aria-hidden="true"><i /></span><span className="reel-note">{copy.reelPlaceholder}</span></div>
+            <span className="reel-tl label">{copy.teaser}</span>
           </div>
         </div>
       </div>
     </div>
     <div className="stats" ref={stats}>{copy.stats.map((label, index) => <div className="stat" key={index}>
-      <strong><Odometer value={copy.statValues[index]} run={counted || reduced} /></strong><span className="eyebrow">{label}</span>
+      <strong><Odometer value={copy.statValues[index]} run={counted || reduced} /></strong><span className="label">{label}</span>
     </div>)}</div>
   </section>
 }
@@ -423,23 +360,22 @@ function About({ copy, reduced }: { copy: Copy; reduced: boolean }) {
     node.addEventListener('pointermove', move); node.addEventListener('pointerenter', enter); node.addEventListener('pointerleave', leave)
     return () => { node.removeEventListener('pointermove', move); node.removeEventListener('pointerenter', enter); node.removeEventListener('pointerleave', leave) }
   }, [reduced])
-  return <section id="about" className="about section">
+  return <section id="about" className="about section theme-paper">
     <div className="about-grid">
       <div className="about-copy">
-        <div className="eyebrow label" data-reveal>03 — {copy.sections[2]}</div>
+        <div className="label" data-reveal>{copy.sections[2]}</div>
         <h2 className="display" data-lines><Lines lines={copy.aboutHeading} accent={1} /></h2>
         <div className="about-prose" data-reveal>{copy.aboutParagraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
-        <ul className="skills" data-reveal>{copy.skills.map((skill, i) => <li key={skill}><span className="eyebrow">{pad(i + 1)}</span>{skill}</li>)}</ul>
+        <ul className="skills" data-reveal>{copy.skills.map(skill => <li key={skill}>{skill}</li>)}</ul>
       </div>
-      <figure className="develop" ref={fig} data-cursor data-cursor-label="DEVELOP" data-reveal>
+      <figure className="develop" ref={fig} data-cursor data-cursor-label="Develop" data-reveal>
         <div className="develop-sprockets" aria-hidden="true" />
         <div className="develop-img">
           <img className="develop-neg" src={asset('portrait.jpeg')} alt="" aria-hidden="true" loading="lazy" />
           <img className="develop-pos" src={asset('portrait.jpeg')} alt={copy.portraitCaption} loading="lazy" />
         </div>
         <div className="develop-sprockets right" aria-hidden="true" />
-        <figcaption className="eyebrow"><span>{copy.negative} ⟷ {copy.positive}</span><span>{copy.developHint}</span></figcaption>
-        <span className="develop-tag eyebrow" aria-hidden="true">KODAK 5219 · 24A</span>
+        <figcaption><span>{copy.negative} / {copy.positive}</span><span className="muted">{copy.developHint}</span></figcaption>
       </figure>
     </div>
   </section>
@@ -477,22 +413,22 @@ function Process({ copy, reduced }: { copy: Copy; reduced: boolean }) {
     <div className="process-sticky">
       <div className="process-grid">
         <div className="process-copy">
-          <div className="eyebrow label">04 — {copy.sections[3]}</div>
+          <div className="label">{copy.sections[3]}</div>
           {reduced
-            ? <ol className="process-all">{copy.steps.map((s, i) => <li key={i}><span className="eyebrow accent">{pad(i + 1)} · f/{processStops[i]}</span><h3>{s.title}</h3><p>{s.body}</p></li>)}</ol>
+            ? <ol className="process-all">{copy.steps.map((s, i) => <li key={i}><span className="process-stop">f/{processStops[i]}</span><h3>{s.title}</h3><p>{s.body}</p></li>)}</ol>
             : <div className="process-current" key={active}>
               <span className="process-num"><span className="line"><span className="line-inner">{pad(active + 1)}</span></span></span>
               <h3><span className="line"><span className="line-inner">{step.title}</span></span></h3>
               <p><span className="line"><span className="line-inner">{step.body}</span></span></p>
             </div>}
           {!reduced && <ol className="process-steps">{copy.steps.map((s, i) => <li key={i} className={i === active ? 'is-active' : ''}>
-            <span className="eyebrow">{pad(i + 1)} · f/{processStops[i]}</span><span className="process-step-name">{s.title}</span><span className="process-bar"><span ref={el => { bars.current[i] = el }} /></span>
+            <span className="process-stop">f/{processStops[i]}</span><span className="process-step-name">{s.title}</span><span className="process-bar"><span ref={el => { bars.current[i] = el }} /></span>
           </li>)}</ol>}
         </div>
         <div className="process-lens">
           <div className="lens-dial" ref={dial} aria-hidden="true">{['1.4', '2', '2.8', '4', '5.6', '8', '11', '16', '22'].map((f, i) => <span key={f} style={{ transform: `rotate(${i * 22 - 88}deg) translateY(calc(var(--lens) * -0.56))` }}>{f}</span>)}</div>
           <Iris ref={iris} label={`${copy.apertureLabel} f/${processStops[active]}`} />
-          <div className="lens-readout"><span className="eyebrow">{copy.apertureLabel}</span><strong>f/{processStops[reduced ? 1 : active]}</strong></div>
+          <div className="lens-readout"><span>{copy.apertureLabel}</span><strong>f/{processStops[reduced ? 1 : active]}</strong></div>
           <span className="lens-index" aria-hidden="true" />
         </div>
       </div>
@@ -505,8 +441,8 @@ function Process({ copy, reduced }: { copy: Copy; reduced: boolean }) {
 function Pricing({ copy, play }: { copy: Copy; play: Play }) {
   const ref = useRef<HTMLDivElement>(null)
   const seen = useInView(ref)
-  return <section id="pricing" className="pricing section">
-    <div className="section-head" data-reveal><span className="eyebrow">05 — {copy.sections[4]}</span><span className="eyebrow muted">{copy.plansNote}</span></div>
+  return <section id="pricing" className="pricing section theme-paper">
+    <div className="section-head" data-reveal><h2 className="section-title">{copy.sections[4]}</h2><span className="label">{copy.plansNote}</span></div>
     <div className={`slates ${seen ? 'is-seen' : ''}`} ref={ref}>
       {copy.plans.map((plan, index) => <article className={`slate ${index === 1 ? 'is-featured' : ''}`} key={index} onPointerEnter={() => play('clap')} style={{ ['--i' as string]: index }}>
         <div className="slate-clap" aria-hidden="true"><span className="clap-arm" /><span className="clap-base" /></div>
@@ -518,7 +454,7 @@ function Pricing({ copy, play }: { copy: Copy; play: Play }) {
           <h3>{plan.name}</h3>
           <strong className="slate-price">{plan.price}</strong>
           <ul>{plan.items.map(item => <li key={item}>{item}</li>)}</ul>
-          <a className="slate-cta eyebrow" href="#contact" data-magnetic><span>{copy.bookThis}</span><span aria-hidden="true">↗</span></a>
+          <a className="slate-cta" href="#contact" data-magnetic><span>{copy.bookThis}</span><span aria-hidden="true">↗</span></a>
         </div>
       </article>)}
     </div>
@@ -539,17 +475,17 @@ function Journal({ copy, language }: { copy: Copy; language: Language }) {
     window.addEventListener('pointermove', move, { passive: true })
     return () => window.removeEventListener('pointermove', move)
   }, [])
-  return <section id="journal" className="journal section">
-    <div className="section-head" data-reveal><span className="eyebrow">06 — {copy.sections[5]}</span><span className="eyebrow muted">{pad(posts.length)} / {copy.readMinutes}</span></div>
+  return <section id="journal" className="journal section theme-paper">
+    <div className="section-head" data-reveal><h2 className="section-title">{copy.sections[5]}</h2></div>
     <div className="journal-list" onPointerLeave={() => setHover(-1)}>
-      {posts.map((post, index) => <article className={`journal-row ${hover === index ? 'is-hover' : ''}`} key={index} data-reveal onPointerEnter={() => setHover(index)} data-cursor data-cursor-label="READ">
-        <span className="eyebrow muted">{dateFormat.format(new Date(`${postDates[index]}T00:00:00Z`))}</span>
+      {posts.map((post, index) => <article className={`journal-row ${hover === index ? 'is-hover' : ''}`} key={index} data-reveal onPointerEnter={() => setHover(index)} data-cursor data-cursor-label="Read">
+        <span className="label">{dateFormat.format(new Date(`${postDates[index]}T00:00:00Z`))}</span>
         <h3>{copy.postTitles[index]}</h3>
-        <span className="eyebrow accent">{post.read.split(' ')[0]} {copy.readMinutes} ↗</span>
+        <span className="label">{post.read.split(' ')[0]} {copy.readMinutes} →</span>
       </article>)}
     </div>
     <div className={`journal-preview ${hover >= 0 ? 'is-on' : ''}`} ref={preview} aria-hidden="true">
-      {[0, 1, 2].map(i => <div key={i} className={`jp jp-${i} ${hover === i ? 'is-active' : ''}`}><span className="eyebrow">{pad(i + 1)}</span></div>)}
+      {[0, 1, 2].map(i => <div key={i} className={`jp jp-${i} ${hover === i ? 'is-active' : ''}`} />)}
     </div>
   </section>
 }
@@ -573,7 +509,7 @@ function Feed({ copy, reduced }: { copy: Copy; reduced: boolean }) {
     return () => context.revert()
   }, [reduced])
   return <section id="feed" className="feed" ref={ref}>
-    <div className="section-head section" data-reveal><span className="eyebrow">07 — {copy.sections[6]} / {copy.sheetLabel}</span><span className="eyebrow accent">@izmab · {copy.sheetNote}</span></div>
+    <div className="section-head section" data-reveal><h2 className="section-title">{copy.sheetLabel}</h2><span className="label">@izmab · {copy.sheetNote}</span></div>
     {['a', 'b'].map((row, r) => <div className={`sheet-strip ${row}`} key={row} dir="ltr" aria-hidden="true">
       {[...sheetFrames, ...sheetFrames.slice(0, 4)].map((f, i) => {
         const frame = r ? sheetFrames[(i + 5) % sheetFrames.length] : f
@@ -605,23 +541,21 @@ function Contact({ copy, language }: { copy: Copy; language: Language }) {
   const copyEmail = async () => {
     try { await navigator.clipboard.writeText('hello@izmab.studio'); setCopied(true); window.setTimeout(() => setCopied(false), 1600) } catch { /* clipboard unavailable */ }
   }
-  return <section id="contact" className="contact section">
-    <div className="eyebrow label" data-reveal>08 — {copy.sections[7]}</div>
+  return <section id="contact" className="contact section theme-paper">
+    <div className="label" data-reveal>{copy.sections[7]}</div>
     <h2 className="contact-heading" data-lines><Lines lines={copy.contactHeading} accent={1} /></h2>
     <div className="contact-grid">
       <div className="contact-details" data-reveal>
-        <div className="detail"><span className="eyebrow muted">Email</span><span className="detail-row"><a href="mailto:hello@izmab.studio" className="detail-big">hello@izmab.studio</a><button type="button" className="pill eyebrow" onClick={copyEmail} aria-live="polite">{copied ? copy.copied : copy.copy}</button></span></div>
-        <div className="detail"><span className="eyebrow muted">{copy.localTime}</span><span className="detail-big"><ZoneClock zone="Asia/Yerevan" locale={languageTags[language]} /></span></div>
-        <div className="detail"><span className="eyebrow muted">{copy.studio}</span><span className="detail-big"><span className="dot" /> {copy.nextOpening}</span></div>
+        <div className="detail"><span className="label">Email</span><span className="detail-row"><a href="mailto:hello@izmab.studio" className="detail-big">hello@izmab.studio</a><button type="button" className="pill" onClick={copyEmail} aria-live="polite">{copied ? copy.copied : copy.copy}</button></span></div>
+        <div className="detail"><span className="label">{copy.localTime}</span><span className="detail-big"><ZoneClock zone="Asia/Yerevan" locale={languageTags[language]} /></span></div>
+        <div className="detail"><span className="label">{copy.studio}</span><span className="detail-big">{copy.nextOpening}</span></div>
       </div>
       <form className="contact-form" onSubmit={submit} data-reveal>
-        <div className="form-clap" aria-hidden="true" />
-        <div className="form-head eyebrow"><span>{copy.slate.prod} IZMAB</span><span>{copy.slate.scene} 01 · {copy.slate.take} 01</span></div>
         {copy.fields.map((label, index) => <label key={index}>
-          <span className="eyebrow">{pad(index + 1)} — {label}</span>
+          <span className="label">{label}</span>
           <input name={['name', 'email', 'project', 'dates'][index]} type={index === 1 ? 'email' : 'text'} placeholder={copy.placeholders[index]} autoComplete={index === 0 ? 'name' : index === 1 ? 'email' : 'off'} required={index < 3} data-cursor="text" />
         </label>)}
-        <button className="action eyebrow" type="submit" data-magnetic data-cursor-label="ACTION"><span>{copy.prepareEmail}</span><span className="action-dot" aria-hidden="true">↗</span></button>
+        <button className="action" type="submit" data-magnetic><span>{copy.prepareEmail}</span><span className="action-dot" aria-hidden="true">↗</span></button>
         {status && <p className="form-note" role="status">{status}</p>}
       </form>
     </div>
@@ -684,7 +618,7 @@ function Gift({ copy, play, reduced }: { copy: Copy; play: Play; reduced: boolea
       </svg>
       <div className="gift-content">
         <div className="gift-copy">
-          <div className="eyebrow gift-eyebrow">09 — {copy.giftEyebrow} · {copy.routeLabel}</div>
+          <div className="label gift-eyebrow">{copy.giftEyebrow}</div>
           <h2 className="gift-heading"><Lines lines={copy.giftHeading} accent={1} /></h2>
           <p className="gift-note">{copy.giftNote}</p>
         </div>
@@ -705,18 +639,15 @@ function Gift({ copy, play, reduced }: { copy: Copy; play: Play; reduced: boolea
 
 /* ───────────────────────────── Credits & footer ───────────────────────────── */
 
-function Footer({ copy }: { copy: Copy }) {
-  const mark = useRef<HTMLAnchorElement>(null)
+function Footer({ copy, reduced }: { copy: Copy; reduced: boolean }) {
   return <footer id="credits" className="credits">
     <div className="credits-roll">
-      <p className="eyebrow accent credits-title" data-reveal>— {copy.creditsTitle} —</p>
+      <p className="label credits-title" data-reveal>{copy.creditsTitle}</p>
       {copy.credits.map(([role, name]) => <div className="credit" key={role} data-reveal><span>{role}</span><strong>{name}</strong></div>)}
     </div>
-    <a className="hover-blur-mark footer-mark" ref={mark} href="#top" aria-label={copy.backToTop} onPointerMove={event => { if (event.pointerType !== 'touch') moveMarkBlur(mark.current, event.clientX, event.clientY) }} onPointerLeave={() => mark.current?.classList.remove('is-blurring')}>
-      <img className="hover-blur-base" src={asset('izmab-wordmark.svg')} alt="IZMAB" loading="lazy" /><span className="hover-blur-layer" aria-hidden="true"><img src={asset('izmab-wordmark.svg')} alt="" loading="lazy" /></span>
-    </a>
+    <a className="footer-mark" href="#top" aria-label={copy.backToTop}><LensMark enabled={!reduced} label={copy.backToTop} /></a>
     <div className="gift-signature"><span>A gift From Bro</span><span>happy emigration</span></div>
-    <div className="footer-bottom eyebrow"><span>© {new Date().getFullYear()} IZMAB — {copy.footerRole}</span><span>{copy.endLabel} · FIN</span><a href="#top">↑ {copy.backToTop}</a></div>
+    <div className="footer-bottom"><span>© {new Date().getFullYear()} IZMAB — {copy.footerRole}</span><span>{copy.endLabel} · FIN</span><a href="#top">↑ {copy.backToTop}</a></div>
   </footer>
 }
 
@@ -802,6 +733,20 @@ export default function App() {
     return () => { mounted = false; context.revert() }
   }, [language, reduced])
 
+  // The header reads dark-on-paper whenever a paper section sits under it.
+  useEffect(() => {
+    let frame = 0, last = -1, light = false
+    const tick = () => {
+      frame = requestAnimationFrame(tick)
+      if (scrollY === last) return
+      last = scrollY
+      const under = document.elementsFromPoint(innerWidth / 2, 40).some(el => el.closest('.theme-paper') && !el.closest('.hdr'))
+      if (under !== light) { light = under; document.documentElement.classList.toggle('hdr-light', light) }
+    }
+    frame = requestAnimationFrame(tick)
+    return () => { cancelAnimationFrame(frame); document.documentElement.classList.remove('hdr-light') }
+  }, [])
+
   // Magnetic controls lean toward the pointer.
   useEffect(() => {
     if (reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
@@ -835,7 +780,6 @@ export default function App() {
         <Manifesto copy={copy} reduced={reduced} />
         <Marquee items={copy.ticker} reduced={reduced} />
         <Work copy={copy} reduced={reduced} play={sound.play} />
-        <NearViewport className="neon-slot"><NeonSign language={language} reduced={reduced} /></NearViewport>
         <Reel copy={copy} reduced={reduced} />
         <About copy={copy} reduced={reduced} />
         <Process copy={copy} reduced={reduced} />
@@ -845,11 +789,9 @@ export default function App() {
         <Contact copy={copy} language={language} />
         <Gift copy={copy} play={sound.play} reduced={reduced} />
       </main>
-      <Footer copy={copy} />
-      {!reduced && <TimelineHud ids={hudIds} chapters={copy.chapters} />}
+      <Footer copy={copy} reduced={reduced} />
     </div>
-    <Grain />
-    {!reduced && <ViewfinderCursor />}
+    {!reduced && <SoftCursor />}
     {!leaderGone && <Preloader label={copy.loading} skip={copy.skip} onOpen={onLeaderOpen} onDone={onLeaderDone} />}
     {pendingLanguage && <LanguageTransition from={transitionOrigin.current} to={pendingLanguage} commit={commitLanguage} finish={finishLanguage} reduced={reduced} />}
   </>
