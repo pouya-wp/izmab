@@ -113,7 +113,8 @@ html.has-cursor input{cursor:text!important}
 .menu-meta{display:flex;justify-content:space-between;padding-top:20px}
 .menu-stage{position:relative;min-height:0}
 .menu-stage-frame{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background:#0f0e0d;border-radius:6px}
-.menu-stage-frame:before{content:'';position:absolute;inset:0;background:url('/portrait.jpeg') 50% 30%/cover;filter:grayscale(1) brightness(.42) contrast(1.1)}
+.menu-stage-img{position:absolute;inset:0;background:50% 50%/cover no-repeat;filter:brightness(.6);animation:stageImg .9s var(--ease) both}
+@keyframes stageImg{from{opacity:0;transform:scale(1.08)}}
 .menu-stage-num{position:absolute;top:22px;left:24px;font:500 13px/1 var(--sans);color:rgba(236,230,220,.7);animation:stageIn .7s var(--ease)}
 .menu-stage-title{position:relative;font-size:clamp(48px,6vw,96px);line-height:.9;color:#f3eee6;animation:stageIn .8s .05s var(--ease) both;text-align:center;padding:0 20px}
 .menu-stage-foot{position:absolute;left:24px;right:24px;bottom:22px;color:rgba(236,230,220,.7)}
@@ -336,11 +337,7 @@ html.hdr-light:not(.menu-open) .hdr .pill-menu:hover{background:var(--accent);bo
 .feed .section-head{padding:clamp(80px,12vh,140px) var(--pad) clamp(24px,3.5vh,36px);border-bottom:0}
 .sheet-strip{display:flex;width:max-content;padding:16px 0;margin-bottom:10px;background:#1a1714;background-image:repeating-linear-gradient(90deg,transparent 0 10px,var(--bg) 10px 20px,transparent 20px 26px),repeating-linear-gradient(90deg,transparent 0 10px,var(--bg) 10px 20px,transparent 20px 26px);background-size:100% 7px,100% 7px;background-position:0 4px,0 calc(100% - 4px);background-repeat:repeat-x;will-change:transform}
 .sheet-frame{position:relative;width:clamp(170px,17vw,260px);aspect-ratio:3/2;margin:0 6px;overflow:hidden;background:#000}
-.sheet-img{position:absolute;inset:0;background:url('/portrait.jpeg') 50% 25%/260% auto no-repeat}
-.g-bw .sheet-img{filter:grayscale(1) contrast(1.2)}
-.g-red .sheet-img{filter:contrast(1.08) saturate(1.1)}
-.g-warm .sheet-img{filter:sepia(.45) saturate(1.15) brightness(1.04)}
-.g-cool .sheet-img{filter:grayscale(.7) brightness(.95) contrast(1.1)}
+.sheet-img{position:absolute;inset:0;background-repeat:no-repeat}
 .sheet-no{position:absolute;bottom:2px;right:8px;font:500 10px/1.6 var(--mono);color:#d9a253;letter-spacing:.08em}
 .sheet-mark{position:absolute;inset:6%;width:88%;height:88%;fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;opacity:.9}
 .sheet-mark.small{inset:auto 6px 6px auto;width:26%;height:auto;fill:var(--accent);stroke:none}
