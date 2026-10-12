@@ -23,12 +23,15 @@ try {
     assert.equal(await page.locator('html').getAttribute('lang'), language)
     assert.equal(await page.locator('html').getAttribute('dir'), language === 'fa' ? 'rtl' : 'ltr')
     assert.equal(await page.locator('.leader').count(), 0, 'Leader should not run with reduced motion')
-    assert.equal(await page.locator('.gift-signature span').first().textContent(), 'A gift From Bro')
-    assert.equal(await page.locator('.gift-signature span').last().textContent(), 'happy emigration')
-    for (const id of ['top', 'manifesto', 'work', 'reel', 'about', 'process', 'pricing', 'journal', 'feed', 'contact', 'gift', 'credits'])
+    assert.equal(await page.locator('.gift-signature').count(), 0, 'Gift signature should be gone')
+    for (const id of ['top', 'manifesto', 'work', 'reel', 'about', 'process', 'pricing', 'journal', 'feed', 'studio', 'contact', 'credits'])
       assert.equal(await page.locator(`#${id}`).count(), 1, `${language}: #${id} missing`)
     assert.equal(await page.locator('.slate').count(), 3)
-    assert.ok(await page.locator('.ticket-route').innerText())
+    assert.match(await page.locator('.price-main').first().innerText(), /\$|US/, `${language}: USD price missing`)
+    assert.match(await page.locator('.price-alt').first().innerText(), /֏/, `${language}: AMD conversion missing`)
+    await page.locator('.currency button').nth(1).click()
+    assert.match(await page.locator('.price-main').first().innerText(), /֏/, `${language}: AMD toggle failed`)
+    assert.ok((await page.locator('.studio-fact').count()) >= 5, `${language}: studio facts missing`)
     assert.ok((await overflow(page)) <= 2, `${language}: horizontal overflow`)
     // Reduced motion: the work list switches projects on click.
     await page.locator('.work-index button').nth(3).click()
@@ -41,7 +44,7 @@ try {
       assert.equal(await page.locator('.pill-menu').getAttribute('aria-expanded'), 'false')
     }
     await context.close()
-    process.stdout.write(`${language}: sections, translation, gift, footer OK\n`)
+    process.stdout.write(`${language}: sections, translation, prices, studio OK\n`)
   }
 
   // Motion pass: leader, viewfinder cursor, WebGL scenes, scroll-driven work cuts, language transition.

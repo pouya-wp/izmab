@@ -12,14 +12,14 @@ Every section borrows a piece of film-making, so the portfolio reads like the wo
 - **Manifesto** — on paper: a word-by-word scroll reveal with serif-italic accents, followed by a velocity-reactive marquee.
 - **Work: the frame that reframes** — a pinned stage where scrolling cuts between projects. The frame physically morphs to each project's aspect ratio (2.39:1 → 4:5 → 16:9 → 9:16 → 3:2), with a noise-dissolve cut and a shutter click. Each project has a generative "living still" (`src/SceneCanvas.tsx`) in its place until real footage lands.
 - **Reel** — a frame that grows from a small card to full bleed as you scroll, playing a rapid-cut teaser montage of the six scenes; stats roll in as odometers (Latin and Persian digits).
-- **About: develop the negative** — the portrait as an orange-mask colour negative on a sprocketed strip; the cursor (or scroll, on touch) develops the positive.
-- **Process: stopping down** — a seven-blade aperture drawn from geometry that closes from f/1.4 to f/11 as you move through Brief → Prep → Shoot → Finish.
-- **Packages as slates** — three clapperboards that clap shut on hover (with a synthesized clap when sound is on).
+- **About: the grade** — a project frame flat in LOG and graded side by side; drag the split and pick a look (Rec.709, Kodak 2383, bleach bypass, noir).
+- **Process: stopping down** — a seven-blade aperture with individually lit blades that closes from f/1.4 to f/11 through Brief → Prep → Shoot → Finish; the portrait seen through it darkens as it stops down, and an aperture scale tracks the stop.
+- **Packages as slates** — three clapperboards that clap shut on hover. Prices in US dollars with the Armenian dram equivalent at today's rate (open.er-api.com, cached per session, approximate fallback offline) and a USD/AMD switch.
 - **Journal** — hover previews that follow the cursor, each a small illustration of the article's idea.
 - **Feed as a contact sheet** — two counter-scrolling film strips with grease-pencil selects.
-- **Contact** — a slate-styled enquiry form, copy-to-clipboard email and a live Yerevan clock.
-- **Departure** — a scroll-drawn flight path to Yerevan under a line-drawn Ararat, a boarding pass whose stub tears off, and the AM stamp.
-- **End credits** — then the wordmark and the exact dedication: “A gift From Bro” / “happy emigration”.
+- **Studio** — IZMAB as a registered company in the Republic of Armenia, based in Yerevan: services, working languages, invoicing in AMD/USD and a live Yerevan clock.
+- **Contact** — an enquiry form and copy-to-clipboard email.
+- **End credits** — then the wordmark.
 
 Palette: warm off-blacks, a paper tone for the manifesto, about, packages and journal, and one red used sparingly. Type: Archivo at a wide stretch in sentence case, with Instrument Serif italics. Persian headlines use PARADOX and its accents PARADOX LINE (`public/fonts/`), with Vazirmatn for body text.
 
@@ -41,10 +41,14 @@ Open the local URL printed by Vite. For a production build, run `pnpm build`.
 - PARADOX and PARADOX LINE are commercial fonts from fontiran.com; confirm the web licence covers this site.
 - Confirm the copy, stats, prices, availability date and `hello@izmab.studio` address. These values came from the original mockup.
 - Connect the booking form to a real endpoint if enquiries should be sent inside the site. It currently opens the visitor's email app with a prepared message; it does not claim to send data itself.
-- The contact clock assumes the studio is in Yerevan (from the gift's Armenia theme), and the contact sheet uses crops of the portrait as stand-ins. Swap the zone in `src/App.tsx` and the frames when real material exists.
+- Confirm the studio facts (registered company in Armenia, services, AMD/USD invoicing) and the USD prices in `src/App.tsx` / `src/i18n-extra.ts`. The stills in `public/stills/` are generative stand-ins for real project frames.
 - Add article pages and social URLs when their real content and destinations are available. The current journal and feed keep the mockup layout without dead links.
 
 The design respects reduced motion settings, supports keyboard focus, and keeps the work stage, process and departure scenes usable on narrow screens.
+
+## Stills
+
+Only the hero uses the portrait. The grade compare, the lens, the menu and the contact sheet use frames rendered from the site's own scenes into `public/stills/`; regenerate them after changing the shader with `CHROMIUM_PATH=/path/to/chromium node scripts/render-stills.mjs`. Swap them for real project stills when those exist.
 
 ## QA
 
