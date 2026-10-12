@@ -21,7 +21,7 @@ Every section borrows a piece of film-making, so the portfolio reads like the wo
 - **Departure** — a scroll-drawn flight path to Yerevan under a line-drawn Ararat, a boarding pass whose stub tears off, and the AM stamp.
 - **End credits** — then the wordmark and the exact dedication: “A gift From Bro” / “happy emigration”.
 
-Palette: warm off-blacks, a paper tone for the manifesto, about, packages and journal, and one red used sparingly. Type: Archivo at a wide stretch in sentence case, with Instrument Serif italics.
+Palette: warm off-blacks, a paper tone for the manifesto, about, packages and journal, and one red used sparingly. Type: Archivo at a wide stretch in sentence case, with Instrument Serif italics. Persian headlines use PARADOX and its accents PARADOX LINE (`public/fonts/`), with Vazirmatn for body text.
 
 Four complete UI languages (English, Persian, Armenian, Russian) with flag transitions, RTL layout for Persian and script-specific type. Lenis smooth scrolling drives GSAP ScrollTrigger. Sound begins only when a visitor turns it on. WebGL canvases are created lazily and pause off screen. With reduced motion, the leader, pinning, scrubbing and cursor are off and every section renders as a static, fully readable page.
 
@@ -38,6 +38,7 @@ Open the local URL printed by Vite. For a production build, run `pnpm build`.
 
 - Add real project stills or videos for the six projects in `src/data.ts`; the generative scenes in `src/SceneCanvas.tsx` are stand-ins and can stay as hover/transition texture.
 - Add the showreel master and process/feed imagery. Those sections currently display clearly labelled placeholders.
+- PARADOX and PARADOX LINE are commercial fonts from fontiran.com; confirm the web licence covers this site.
 - Confirm the copy, stats, prices, availability date and `hello@izmab.studio` address. These values came from the original mockup.
 - Connect the booking form to a real endpoint if enquiries should be sent inside the site. It currently opens the visitor's email app with a prepared message; it does not claim to send data itself.
 - The contact clock assumes the studio is in Yerevan (from the gift's Armenia theme), and the contact sheet uses crops of the portrait as stand-ins. Swap the zone in `src/App.tsx` and the frames when real material exists.

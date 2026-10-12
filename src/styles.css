@@ -1,4 +1,7 @@
 /* ═════════════ IZMAB ═════════════ */
+/* Persian display faces (PARADOX, fontiran.com). The unicode-range keeps them to Persian script, so Latin falls back to Archivo/Vazirmatn. */
+@font-face{font-family:'Paradox';src:url('/fonts/paradox.woff2') format('woff2');font-weight:100 900;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+200C-200F,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:'Paradox Line';src:url('/fonts/paradox-line.woff2') format('woff2');font-weight:100 900;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+200C-200F,U+FB50-FDFF,U+FE70-FEFF}
 @property --r { syntax: '<length-percentage>'; inherits: true; initial-value: 0px; }
 
 :root{
@@ -45,6 +48,7 @@ h1,h2,h3,p,figure{margin:0}
 .label + .display,.label + .contact-heading{margin-top:clamp(18px,3vh,30px)}
 .pill{display:inline-flex;align-items:center;gap:10px;height:42px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:rgba(13,12,11,.35);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);font:500 13px/1 var(--sans);transition:border-color .3s,background .3s,color .3s}
 .pill:hover{border-color:var(--ink)}
+.theme-paper .pill{background:transparent}
 
 /* ───── leader ───── */
 .leader{position:fixed;inset:0;z-index:200;display:grid;place-items:center;--sweep:0deg}
@@ -152,7 +156,7 @@ html.hdr-light:not(.menu-open) .hdr .pill-menu:hover{background:var(--accent);bo
 .manifesto-text{max-width:22ch;font-size:clamp(36px,5.2vw,92px);line-height:1;text-wrap:pretty}
 .manifesto-text .serif{font-size:1.06em}
 .mf-word.accent{color:inherit}
-.marquee{overflow:hidden;padding:clamp(18px,3vh,30px) 0;border-bottom:1px solid var(--line);background:var(--bg)}
+.marquee{overflow:hidden;padding:clamp(18px,3vh,30px) 0 clamp(40px,7vh,80px)}
 .marquee-row{display:flex;width:max-content;will-change:transform}
 .marquee-row span{display:flex;align-items:center;gap:clamp(22px,3vw,44px);padding-right:clamp(22px,3vw,44px);font-size:clamp(34px,4.6vw,80px);line-height:1;white-space:nowrap;color:var(--ink)}
 .marquee-row i{width:.16em;height:.16em;border-radius:50%;background:var(--accent)}
@@ -319,7 +323,7 @@ html.hdr-light:not(.menu-open) .hdr .pill-menu:hover{background:var(--accent);bo
 .sheet-mark.small{inset:auto 6px 6px auto;width:26%;height:auto;fill:var(--accent);stroke:none}
 
 /* ───── contact ───── */
-.contact{border-top:1px solid var(--line)}
+.contact{border-top:0}
 .contact-heading{font-size:clamp(72px,14vw,260px);line-height:.85;letter-spacing:-.06em}
 .contact-heading .serif{padding-inline-start:.5em}
 .contact-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(40px,6vw,110px);margin-top:clamp(50px,9vh,110px);align-items:start}
@@ -405,10 +409,12 @@ a.detail-big:hover{color:var(--accent)}
 
 /* ───── scripts ───── */
 .lang-fa{font-family:Vazirmatn,Tahoma,sans-serif}
-.lang-fa :is(.display,.section-title,.hero-line,.contact-heading,.gift-heading,.process-current h3,.slate h3,.manifesto-text,.marquee-row span,.reel-words,.menu-link,.menu-stage-title,.label,.pill,.hero-kicker,.manifesto-aside,.work-index-title,.work-meta,.about-prose,.skills li,.process-current p,.process-step-name,.slate ul,.slate-cta,.journal-row h3,.detail-big,.contact-form input,.action,.gift-note,.ticket-route,.credit span,.credit strong,.footer-bottom,.reel-note,.develop figcaption,.process-all h3,.hdr-status,.cursor-disc span){font-family:Vazirmatn,Tahoma,sans-serif;letter-spacing:-.01em}
-.lang-fa :is(.display,.section-title,.hero-line,.contact-heading,.gift-heading,.process-current h3,.slate h3,.manifesto-text,.marquee-row span,.reel-words,.menu-link,.process-all h3){font-weight:700}
-.lang-fa .serif{font-family:Vazirmatn,Tahoma,sans-serif;font-style:normal;font-weight:300}
-.lang-fa .eyebrow{font-family:Vazirmatn,Tahoma,sans-serif;letter-spacing:0}
+.lang-fa :is(.label,.pill,.hero-kicker,.manifesto-aside,.work-index-title,.work-meta,.about-prose,.skills li,.process-current p,.process-step-name,.slate ul,.slate-cta,.journal-row h3,.contact-form input,.action,.gift-note,.credit span,.footer-bottom,.reel-note,.develop figcaption,.hdr-status,.cursor-disc span,.form-note,.eyebrow){font-family:Vazirmatn,Tahoma,sans-serif;letter-spacing:0}
+.lang-fa :is(.display,.section-title,.hero-line,.contact-heading,.gift-heading,.process-current h3,.slate h3,.manifesto-text,.marquee-row span,.reel-words,.menu-link,.menu-stage-title,.process-all h3,.ticket-route,.credit strong,.detail-big,.stat strong,.process-num,.slate-price,.lens-readout strong,.language-transition-word){font-family:Archivo,'Paradox',Vazirmatn,sans-serif;font-weight:400;font-stretch:112%;letter-spacing:0;word-spacing:.04em}
+.lang-fa :is(.hero-line,.display,.gift-heading,.manifesto-text,.contact-heading){line-height:1.12}
+.lang-fa .manifesto-text{line-height:1.22;font-size:clamp(32px,4.4vw,78px)}
+.lang-fa .serif{font-family:'Paradox Line','Paradox',Vazirmatn,sans-serif;font-style:normal;font-weight:400;letter-spacing:0}
+.lang-fa .line{padding-bottom:.2em;margin-bottom:-.2em}
 .lang-hy{font-family:'Noto Sans Armenian',Arial,sans-serif}
 .lang-hy :is(.display,.section-title,.hero-line,.contact-heading,.gift-heading,.process-current h3,.slate h3,.manifesto-text,.marquee-row span,.reel-words,.menu-link,.menu-stage-title,.process-all h3,.ticket-route,.credit strong,.detail-big){font-family:'Noto Sans Armenian',Arial,sans-serif;font-weight:600;letter-spacing:-.04em}
 .lang-hy :is(.label,.pill,.hero-kicker,.manifesto-aside,.about-prose,.skills li,.process-current p,.slate ul,.slate-cta,.journal-row h3,.contact-form input,.action,.gift-note,.credit span,.footer-bottom,.reel-note,.hdr-status,.eyebrow){font-family:'Noto Sans Armenian',Arial,sans-serif;letter-spacing:0}
