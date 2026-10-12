@@ -132,7 +132,8 @@ html.has-vf input,html.has-vf [data-cursor=text]{cursor:text!important}
 .hero-frame{position:absolute;inset:0;overflow:hidden;clip-path:inset(0% 0% 0% 0% round 0px);will-change:clip-path}
 .hero-inner{position:absolute;inset:0;overflow:hidden}
 .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 50% 42%,#191314 0%,#080707 60%,#050505 100%)}
-.hero-mark{position:absolute;top:36%;left:50%;width:min(90vw,1560px);aspect-ratio:1636/359;transform:translate(-50%,-50%);z-index:1;pointer-events:none;--blur-radius:clamp(95px,12vw,180px)}
+/* The M's centre is x 782/1636 in the wordmark, so the mark is offset until the M — not the word — sits on the portrait's axis. */
+.hero-mark{--mw:min(90vw,1560px);--my:36%;position:absolute;top:calc(var(--my) - var(--mw) * 359 / 1636 / 2);left:calc(50% - var(--mw) * .47806);width:var(--mw);aspect-ratio:1636/359;z-index:1;pointer-events:none;--blur-radius:clamp(95px,12vw,180px)}
 .hero-mark>img{display:block;width:100%;height:auto}
 .hero-portrait-shell{position:absolute;bottom:-6vh;left:50%;height:96%;aspect-ratio:2752/1536;max-width:none;translate:-50% 0;z-index:2;will-change:transform}
 .depth-host{position:relative;width:100%;height:100%;-webkit-mask:url('/portrait-cutout.png') center/100% 100% no-repeat;mask:url('/portrait-cutout.png') center/100% 100% no-repeat;mask-mode:alpha}
@@ -520,7 +521,7 @@ a.detail-big:hover{color:var(--red)}
   .pill{height:40px;padding:0 12px}
   .pill-word{display:none}
   .pill-lang select{max-width:72px;font-size:10.5px}
-  .hero-mark{top:30%;width:96vw}
+  .hero-mark{--mw:92vw;--my:30%}
   .hero-portrait-shell{height:74%;bottom:4vh}
   .vf-frame{inset:72px 12px 30px}
   .vf-exp{gap:10px;right:auto;left:16px;bottom:10px;font-size:9.5px}.vf-exp span:nth-child(4){display:none}
