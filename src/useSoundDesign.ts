@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-export type SoundCue = 'hover' | 'click' | 'transition' | 'stamp'
+export type SoundCue = 'hover' | 'click' | 'transition' | 'stamp' | 'clap' | 'shutter'
 
 function tone(context: AudioContext, frequency: number, duration: number, level: number, delay = 0) {
   const oscillator = context.createOscillator()
@@ -16,11 +16,28 @@ function tone(context: AudioContext, frequency: number, duration: number, level:
   oscillator.stop(context.currentTime + delay + duration + 0.02)
 }
 
+function noise(context: AudioContext, duration: number, level: number, cutoff: number, delay = 0) {
+  const length = Math.ceil(context.sampleRate * duration)
+  const buffer = context.createBuffer(1, length, context.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 4)
+  const source = context.createBufferSource()
+  const filter = context.createBiquadFilter()
+  const gain = context.createGain()
+  source.buffer = buffer
+  filter.type = 'bandpass'; filter.frequency.value = cutoff; filter.Q.value = .8
+  gain.gain.value = level
+  source.connect(filter).connect(gain).connect(context.destination)
+  source.start(context.currentTime + delay)
+}
+
 function playCue(context: AudioContext, cue: SoundCue) {
   if (context.state !== 'running') return
   if (cue === 'hover') tone(context, 720, 0.09, 0.014)
   if (cue === 'click') { tone(context, 190, 0.13, 0.035); tone(context, 570, 0.11, 0.018, 0.025) }
   if (cue === 'transition') { tone(context, 440, 0.16, 0.014); tone(context, 660, 0.2, 0.012, 0.07) }
+  if (cue === 'clap') { noise(context, .09, .5, 2200); tone(context, 140, .08, .03) }
+  if (cue === 'shutter') { noise(context, .04, .35, 3800); noise(context, .05, .3, 2600, .07) }
   if (cue === 'stamp') { tone(context, 170, 0.2, 0.045); tone(context, 510, 0.33, 0.022, 0.09); tone(context, 760, 0.4, 0.014, 0.17) }
 }
 
