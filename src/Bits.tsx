@@ -1,42 +1,63 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import gsap from 'gsap'
 
-/* A seven-blade aperture drawn from geometry: the opening is a rotating heptagon and each blade edge runs from
- * one vertex, along the polygon side, out to the barrel. setOpen(0..1) is cheap enough to call on every scroll frame. */
-const N = 7, C = 200, R = 188
+/* A seven-blade aperture drawn from geometry. The opening is a rotating heptagon; the outside is split into
+ * pinwheel wedges, one per blade, each lit by its angle to a light at the top left, so the blades change shade
+ * as they turn. Through the opening the portrait darkens as the lens stops down, as exposure would.
+ * setOpen(0..1) is cheap enough to call on every scroll frame. */
+const N = 7, C = 200, R = 150
 export type IrisHandle = { setOpen: (open: number) => void }
 export const Iris = forwardRef<IrisHandle, { label: string }>(function Iris({ label }, ref) {
-  const fill = useRef<SVGPathElement>(null)
+  const blades = useRef<(SVGPolygonElement | null)[]>([])
+  const rim = useRef<SVGPathElement>(null)
   const edges = useRef<SVGPathElement>(null)
+  const shade = useRef<SVGCircleElement>(null)
   const setOpen = (open: number) => {
-    const r = 18 + open * (R - 26)
-    const phase = (1 - open) * 1.1
+    const r = 12 + open * (R - 14)
+    const phase = (1 - open) * 1.2 - Math.PI / 2
     const v = Array.from({ length: N }, (_, i) => { const a = phase + i * Math.PI * 2 / N; return [C + Math.cos(a) * r, C + Math.sin(a) * r] })
-    const poly = v.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join('') + 'Z'
-    fill.current?.setAttribute('d', `M${C - R} ${C}a${R} ${R} 0 1 0 ${R * 2} 0a${R} ${R} 0 1 0 ${-R * 2} 0Z${poly}`)
-    const lines = v.map(([x, y], i) => {
-      const [nx, ny] = v[(i + 1) % N]
-      let dx = nx - x, dy = ny - y
-      const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len
-      const ox = x - C, oy = y - C
-      const b = dx * ox + dy * oy
+    const d = v.map(([x, y], i) => { const [nx, ny] = v[(i + 1) % N]; const l = Math.hypot(nx - x, ny - y) || 1; return [(nx - x) / l, (ny - y) / l] })
+    const K = R * 3, light = -Math.PI * .75
+    let lines = ''
+    for (let j = 0; j < N; j++) {
+      const k = (j + 1) % N
+      const [x, y] = v[k], [ax, ay] = d[j], [bx, by] = d[k]
+      blades.current[j]?.setAttribute('points', `${x.toFixed(2)},${y.toFixed(2)} ${(x + ax * K).toFixed(2)},${(y + ay * K).toFixed(2)} ${(x + bx * K).toFixed(2)},${(y + by * K).toFixed(2)}`)
+      const mid = Math.atan2(ay + by, ax + bx)
+      const lit = .5 + .5 * Math.cos(mid - light)
+      const l = Math.round(20 + lit * 34)
+      blades.current[j]?.setAttribute('fill', `rgb(${l + 3},${l},${l - 3})`)
+      const ox = x - C, oy = y - C, b = ax * ox + ay * oy
       const t = -b + Math.sqrt(Math.max(0, b * b - (ox * ox + oy * oy - R * R)))
-      return `M${(x - dx * 0).toFixed(2)} ${y.toFixed(2)}L${(x + dx * t).toFixed(2)} ${(y + dy * t).toFixed(2)}`
-    }).join('')
+      lines += `M${x.toFixed(2)} ${y.toFixed(2)}L${(x + ax * t).toFixed(2)} ${(y + ay * t).toFixed(2)}`
+    }
     edges.current?.setAttribute('d', lines)
+    rim.current?.setAttribute('d', v.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join('') + 'Z')
+    shade.current?.setAttribute('opacity', String((1 - open) * .62))
   }
   useImperativeHandle(ref, () => ({ setOpen }))
   useEffect(() => { setOpen(1) }, [])
+  const ticks = 2 * Math.PI * 183 / 120
   return <svg className="iris" viewBox="0 0 400 400" role="img" aria-label={label}>
     <defs>
-      <radialGradient id="iris-glow"><stop offset="0" stopColor="#f0a27a" /><stop offset=".3" stopColor="#c2412b" /><stop offset=".75" stopColor="#3a120c" /><stop offset="1" stopColor="#140806" /></radialGradient>
-      <linearGradient id="iris-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#2b2724" /><stop offset=".45" stopColor="#0f0e0d" /><stop offset=".55" stopColor="#1d1a18" /><stop offset="1" stopColor="#080707" /></linearGradient>
+      <clipPath id="iris-clip"><circle cx={C} cy={C} r={R} /></clipPath>
+      <radialGradient id="iris-depth" cx="50%" cy="50%" r="50%"><stop offset=".55" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".55" /></radialGradient>
+      <linearGradient id="iris-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".16" /><stop offset=".38" stopColor="#fff" stopOpacity="0" /><stop offset=".8" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#fff" stopOpacity=".05" /></linearGradient>
+      <linearGradient id="iris-barrel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#2a2724" /><stop offset=".5" stopColor="#121110" /><stop offset="1" stopColor="#1c1a18" /></linearGradient>
     </defs>
-    <circle cx={C} cy={C} r={R} fill="url(#iris-glow)" />
-    <path ref={fill} fill="url(#iris-metal)" fillRule="evenodd" />
-    <path ref={edges} fill="none" stroke="rgba(236,230,220,.2)" strokeWidth="1.2" />
-    <circle cx={C} cy={C} r={R} fill="none" stroke="rgba(236,230,220,.28)" strokeWidth="1" />
-    <circle cx={C} cy={C} r={R + 7} fill="none" stroke="rgba(236,230,220,.1)" strokeWidth="6" strokeDasharray="1.5 6" />
+    <circle cx={C} cy={C} r={197} fill="url(#iris-barrel)" />
+    <circle cx={C} cy={C} r={183} fill="none" stroke="rgba(236,230,220,.35)" strokeWidth="7" strokeDasharray={`1 ${(ticks - 1).toFixed(3)}`} />
+    <circle cx={C} cy={C} r={170} fill="#0b0a09" />
+    <circle cx={C} cy={C} r={R + 4} fill="none" stroke="rgba(236,230,220,.14)" strokeWidth="1" />
+    <g clipPath="url(#iris-clip)">
+      <image href="/portrait.jpeg" x={C - R * 1.3} y={C - R * .92} width={R * 2.6} height={R * 2.6} preserveAspectRatio="xMidYMin slice" />
+      <circle ref={shade} cx={C} cy={C} r={R} fill="#000" opacity="0" />
+      {Array.from({ length: N }, (_, i) => <polygon key={i} ref={el => { blades.current[i] = el }} />)}
+      <circle cx={C} cy={C} r={R} fill="url(#iris-depth)" />
+      <path ref={edges} fill="none" stroke="rgba(0,0,0,.55)" strokeWidth="1.4" />
+      <path ref={rim} fill="none" stroke="rgba(255,236,220,.35)" strokeWidth="1" />
+    </g>
+    <circle cx={C} cy={C} r={R} fill="url(#iris-glass)" pointerEvents="none" />
   </svg>
 })
 

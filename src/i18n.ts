@@ -22,8 +22,7 @@ export interface LocaleText {
   postTitles: string[]; readMinutes: string; feedPlaceholder: string; comingSoon: string
   contactHeading: [string, string]; nextOpening: string; fields: string[]; placeholders: string[]
   prepareEmail: string; emailPrepared: string
-  giftEyebrow: string; giftHeading: [string, string]; giftNote: string; giftRoute: string; giftDestination: string
-  ticketOneWay: string; ticketTagline: string; endLabel: string; backToTop: string; footerRole: string
+  endLabel: string; backToTop: string; footerRole: string
 }
 
 export const text: Record<Language, LocaleText> = {
@@ -62,9 +61,7 @@ export const text: Record<Language, LocaleText> = {
     contactHeading: ['Let’s', 'roll'], nextOpening: 'Next opening: Nov 2026', fields: ['Name', 'Email', 'Project', 'Dates'],
     placeholders: ['Who is asking', 'Where to reply', 'Brand film, portraits, event…', 'Rough window is fine'],
     prepareEmail: 'Prepare enquiry email', emailPrepared: 'Your email app will open with the enquiry ready to send.',
-    giftEyebrow: 'One more frame', giftHeading: ['New place.', 'Same fire.'],
-    giftNote: 'Every journey deserves a beginning worth remembering. Take your eye, your courage and your story wherever you go.',
-    giftRoute: 'From here', giftDestination: 'To Armenia', ticketOneWay: 'One way', ticketTagline: 'Made for the next chapter', endLabel: 'End', backToTop: 'Back to top', footerRole: 'Video & photography',
+    endLabel: 'End', backToTop: 'Back to top', footerRole: 'Video & photography',
   },
   fa: {
     available: 'آمادهٔ همکاری · ۲۰۲۶', menu: 'منو', close: 'بستن', soundOn: 'صدا روشن', soundOff: 'صدا خاموش', soundLabel: 'صدا', languageLabel: 'زبان',
@@ -101,9 +98,7 @@ export const text: Record<Language, LocaleText> = {
     contactHeading: ['شروع', 'کنیم'], nextOpening: 'نوبت بعدی: نوامبر ۲۰۲۶', fields: ['نام', 'ایمیل', 'پروژه', 'زمان'],
     placeholders: ['چه کسی پیام می‌دهد؟', 'آدرس پاسخ', 'فیلم برند، پرتره، رویداد…', 'بازهٔ تقریبی کافی است'],
     prepareEmail: 'آماده‌کردن ایمیل', emailPrepared: 'برنامهٔ ایمیل شما با متن آماده باز می‌شود؛ ارسال نهایی با شماست.',
-    giftEyebrow: 'یک قاب دیگر', giftHeading: ['جای تازه.', 'همان آتش.'],
-    giftNote: 'هر سفر، شروعی می‌خواهد که به یاد بماند. نگاهت، شجاعتت و داستانت را هر جا که می‌روی با خودت ببر.',
-    giftRoute: 'از اینجا', giftDestination: 'به ارمنستان', ticketOneWay: 'یک‌طرفه', ticketTagline: 'برای فصل تازه', endLabel: 'پایان', backToTop: 'بازگشت به بالا', footerRole: 'ویدیو و عکاسی',
+    endLabel: 'پایان', backToTop: 'بازگشت به بالا', footerRole: 'ویدیو و عکاسی',
   },
   hy: {
     available: 'Պատրաստ համագործակցության · 2026', menu: 'Մենյու', close: 'Փակել', soundOn: 'Ձայնը միացված է', soundOff: 'Ձայնն անջատված է', soundLabel: 'Ձայն', languageLabel: 'Լեզու',
@@ -140,9 +135,7 @@ export const text: Record<Language, LocaleText> = {
     contactHeading: ['Սկսե՞նք', 'նկարել'], nextOpening: 'Հաջորդ ազատ ժամկետը՝ նոյեմբեր 2026', fields: ['Անուն', 'Էլ. փոստ', 'Նախագիծ', 'Ժամկետ'],
     placeholders: ['Ո՞վ է գրում', 'Որտե՞ղ պատասխանել', 'Բրենդային ֆիլմ, դիմանկար, միջոցառում…', 'Մոտավոր ժամկետը բավարար է'],
     prepareEmail: 'Պատրաստել նամակը', emailPrepared: 'Ձեր փոստային ծրագիրը կբացվի պատրաստ նամակով. ուղարկումը հաստատում եք դուք։',
-    giftEyebrow: 'Եվս մեկ կադր', giftHeading: ['Նոր վայր։', 'Նույն կրակը։'],
-    giftNote: 'Յուրաքանչյուր ճանապարհ արժանի է հիշվող սկզբի։ Քո հայացքը, քաջությունն ու պատմությունը տար քեզ հետ՝ ուր էլ գնաս։',
-    giftRoute: 'Այստեղից', giftDestination: 'Դեպի Հայաստան', ticketOneWay: 'Միակողմանի', ticketTagline: 'Նոր գլխի համար', endLabel: 'Ավարտ', backToTop: 'Վերադառնալ սկիզբ', footerRole: 'Տեսանյութ և լուսանկարչություն',
+    endLabel: 'Ավարտ', backToTop: 'Վերադառնալ սկիզբ', footerRole: 'Տեսանյութ և լուսանկարչություն',
   },
   ru: {
     available: 'Открыт к проектам · 2026', menu: 'Меню', close: 'Закрыть', soundOn: 'Звук включён', soundOff: 'Звук выключен', soundLabel: 'Звук', languageLabel: 'Язык',
@@ -179,8 +172,6 @@ export const text: Record<Language, LocaleText> = {
     contactHeading: ['Начнём', 'снимать'], nextOpening: 'Ближайшее окно: ноябрь 2026', fields: ['Имя', 'Почта', 'Проект', 'Даты'],
     placeholders: ['Как к вам обращаться', 'Куда ответить', 'Бренд-фильм, портреты, событие…', 'Примерного периода достаточно'],
     prepareEmail: 'Подготовить письмо', emailPrepared: 'Почтовое приложение откроется с готовым письмом. Отправку подтверждаете вы.',
-    giftEyebrow: 'Ещё один кадр', giftHeading: ['Новое место.', 'Тот же огонь.'],
-    giftNote: 'Каждое путешествие заслуживает начала, которое хочется помнить. Возьми с собой свой взгляд, смелость и историю — куда бы ты ни отправился.',
-    giftRoute: 'Отсюда', giftDestination: 'В Армению', ticketOneWay: 'В один конец', ticketTagline: 'Для новой главы', endLabel: 'Конец', backToTop: 'Наверх', footerRole: 'Видео и фотография',
+    endLabel: 'Конец', backToTop: 'Наверх', footerRole: 'Видео и фотография',
   },
 }
