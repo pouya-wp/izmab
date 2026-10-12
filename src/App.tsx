@@ -111,6 +111,7 @@ function Header({ copy, language, setLanguage, soundEnabled, toggleSound, play, 
         </div>
         <div className="menu-stage menu-fade" aria-hidden="true">
           <div className="menu-stage-frame">
+            <span className="menu-stage-img" key={`img${hover}`} style={{ backgroundImage: `url(${asset(`stills/${stillNames[hover % stillNames.length]}-a.jpg`)})` }} />
             <strong className="menu-stage-num" key={`n${hover}`}>{pad(hover + 1)}</strong>
             <span className="menu-stage-title serif" key={`t${language}${hover}`}>{copy.nav[hover]}</span>
             <span className="menu-stage-foot label">{copy.sections[hover === 6 ? 7 : hover]}</span>
@@ -376,8 +377,8 @@ function About({ copy, reduced }: { copy: Copy; reduced: boolean }) {
       </div>
       <figure className="grade" data-reveal>
         <div className="grade-frame" ref={frame} dir="ltr" data-cursor data-cursor-label="⟷">
-          <img className="grade-log" src={asset('portrait.jpeg')} alt="" aria-hidden="true" loading="lazy" />
-          <img className="grade-look" src={asset('portrait.jpeg')} alt={copy.portraitCaption} loading="lazy" style={{ filter: looks[look].filter }} />
+          <img className="grade-log" src={asset('stills/grade.jpg')} alt="" aria-hidden="true" loading="lazy" />
+          <img className="grade-look" src={asset('stills/grade.jpg')} alt={copy.gradeLabel} loading="lazy" style={{ filter: looks[look].filter }} />
           <span className="grade-line" aria-hidden="true"><i /></span>
           <span className="grade-tag is-left">LOG-C</span>
           <span className="grade-tag is-right" key={look}>{looks[look].name}</span>
@@ -562,11 +563,13 @@ function Journal({ copy, language }: { copy: Copy; language: Language }) {
 
 /* ───────────────────────────── Feed: contact sheet ───────────────────────────── */
 
+// Contact-sheet frames: crops of the project stills, so the feed reads as a strip of real selects.
+const stillNames = ['nocturne', 'salt', 'lowlight', 'atlas', 'ember', 'nights']
 const sheetFrames = [
-  { pos: '50% 22%', grade: 'bw', mark: '' }, { pos: '46% 30%', grade: 'red', mark: 'circle' }, { pos: '54% 18%', grade: 'warm', mark: '' },
-  { pos: '50% 60%', grade: 'bw', mark: 'cross' }, { pos: '42% 25%', grade: 'cool', mark: '' }, { pos: '58% 28%', grade: 'red', mark: '' },
-  { pos: '50% 40%', grade: 'warm', mark: 'star' }, { pos: '48% 20%', grade: 'bw', mark: '' }, { pos: '53% 35%', grade: 'cool', mark: '' },
-  { pos: '50% 26%', grade: 'red', mark: '' },
+  { src: 'nocturne-a', pos: '40% 60%', zoom: 140, mark: '' }, { src: 'ember-b', pos: '55% 45%', zoom: 170, mark: 'circle' }, { src: 'salt-a', pos: '30% 55%', zoom: 160, mark: '' },
+  { src: 'atlas-b', pos: '50% 70%', zoom: 120, mark: 'cross' }, { src: 'lowlight-a', pos: '70% 40%', zoom: 180, mark: '' }, { src: 'nights-a', pos: '35% 25%', zoom: 150, mark: '' },
+  { src: 'nocturne-b', pos: '75% 50%', zoom: 210, mark: 'star' }, { src: 'salt-b', pos: '65% 45%', zoom: 130, mark: '' }, { src: 'atlas-a', pos: '50% 20%', zoom: 170, mark: '' },
+  { src: 'ember-a', pos: '30% 80%', zoom: 140, mark: '' }, { src: 'nights-b', pos: '60% 30%', zoom: 190, mark: 'circle' }, { src: 'lowlight-b', pos: '20% 60%', zoom: 130, mark: '' },
 ]
 function Feed({ copy, reduced }: { copy: Copy; reduced: boolean }) {
   const ref = useRef<HTMLElement>(null)
@@ -583,8 +586,8 @@ function Feed({ copy, reduced }: { copy: Copy; reduced: boolean }) {
     {['a', 'b'].map((row, r) => <div className={`sheet-strip ${row}`} key={row} dir="ltr" aria-hidden="true">
       {[...sheetFrames, ...sheetFrames.slice(0, 4)].map((f, i) => {
         const frame = r ? sheetFrames[(i + 5) % sheetFrames.length] : f
-        return <div className={`sheet-frame g-${frame.grade}`} key={i}>
-          <span className="sheet-img" style={{ backgroundPosition: frame.pos }} />
+        return <div className="sheet-frame" key={i}>
+          <span className="sheet-img" style={{ backgroundImage: `url(${asset(`stills/${frame.src}.jpg`)})`, backgroundPosition: frame.pos, backgroundSize: `${frame.zoom}% auto` }} />
           <span className="sheet-no">{12 + i + r * 14}{i % 2 ? 'A' : ''}</span>
           {frame.mark === 'circle' && <svg className="sheet-mark" viewBox="0 0 100 100"><path d="M50 8C78 6 94 28 92 52 90 78 66 94 44 92 20 90 6 70 8 46 10 24 30 10 56 9" /></svg>}
           {frame.mark === 'cross' && <svg className="sheet-mark" viewBox="0 0 100 100"><path d="M18 20 82 84M84 18 20 82" /></svg>}

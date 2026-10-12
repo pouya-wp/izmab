@@ -3,7 +3,7 @@ import gsap from 'gsap'
 
 /* A seven-blade aperture drawn from geometry. The opening is a rotating heptagon; the outside is split into
  * pinwheel wedges, one per blade, each lit by its angle to a light at the top left, so the blades change shade
- * as they turn. Through the opening the portrait darkens as the lens stops down, as exposure would.
+ * as they turn. Through the opening the scene darkens as the lens stops down, as exposure would.
  * setOpen(0..1) is cheap enough to call on every scroll frame. */
 const N = 7, C = 200, R = 150
 export type IrisHandle = { setOpen: (open: number) => void }
@@ -50,7 +50,7 @@ export const Iris = forwardRef<IrisHandle, { label: string }>(function Iris({ la
     <circle cx={C} cy={C} r={170} fill="#0b0a09" />
     <circle cx={C} cy={C} r={R + 4} fill="none" stroke="rgba(236,230,220,.14)" strokeWidth="1" />
     <g clipPath="url(#iris-clip)">
-      <image href="/portrait.jpeg" x={C - R * 1.3} y={C - R * .92} width={R * 2.6} height={R * 2.6} preserveAspectRatio="xMidYMin slice" />
+      <image href="/stills/lens.jpg" x={C - R} y={C - R} width={R * 2} height={R * 2} preserveAspectRatio="xMidYMid slice" />
       <circle ref={shade} cx={C} cy={C} r={R} fill="#000" opacity="0" />
       {Array.from({ length: N }, (_, i) => <polygon key={i} ref={el => { blades.current[i] = el }} />)}
       <circle cx={C} cy={C} r={R} fill="url(#iris-depth)" />
