@@ -7,12 +7,10 @@ React + TypeScript + Vite rebuild of the original IZMAB prototype. The source pr
 Every section borrows a piece of film-making, so the portfolio reads like the work it sells.
 
 - **Leader** — a 3·2·1 academy-leader countdown with a sweep and flash, then the shutter opens on the hero. Runs once per session; skippable; never runs with reduced motion.
-- **Viewfinder hero** — the depth portrait behind a camera HUD: live REC timecode, frame corners, an exposure readout where the cursor sets aperture (x) and white balance (y), and an AF box that trails the pointer. Scrolling pulls the frame back into a rounded letterbox.
-- **Viewfinder cursor** — four focus brackets that snap around whatever they rest on, with contextual labels (CUT, READ, DEVELOP, ACTION).
-- **Timeline HUD** — the page as an edit: chapter name, a scrub bar with chapter ticks, and a timecode for the scroll position.
-- **Manifesto** — a word-by-word scroll reveal with serif-italic accents; a velocity-reactive double marquee follows.
+- **Hero** — the portrait, cut out so the wordmark's M sits exactly behind the head. The wordmark is seen through a moving lens (`src/LensMark.tsx`): depth-of-field blur that falls off smoothly from the cursor, a touch of magnification, a smear along the direction of travel and a film-like halation glow. Scrolling pulls the frame back into a rounded letterbox.
+- **Cursor** — a small dot that opens into a labelled disc over media (Read, Develop, Soon).
+- **Manifesto** — on paper: a word-by-word scroll reveal with serif-italic accents, followed by a velocity-reactive marquee.
 - **Work: the frame that reframes** — a pinned stage where scrolling cuts between projects. The frame physically morphs to each project's aspect ratio (2.39:1 → 4:5 → 16:9 → 9:16 → 3:2), with a noise-dissolve cut and a shutter click. Each project has a generative "living still" (`src/SceneCanvas.tsx`) in its place until real footage lands.
-- **Neon interlude** — the glass-and-metal 3D sign, now mounted only when it nears the viewport.
 - **Reel** — a frame that grows from a small card to full bleed as you scroll, playing a rapid-cut teaser montage of the six scenes; stats roll in as odometers (Latin and Persian digits).
 - **About: develop the negative** — the portrait as an orange-mask colour negative on a sprocketed strip; the cursor (or scroll, on touch) develops the positive.
 - **Process: stopping down** — a seven-blade aperture drawn from geometry that closes from f/1.4 to f/11 as you move through Brief → Prep → Shoot → Finish.
@@ -22,6 +20,8 @@ Every section borrows a piece of film-making, so the portfolio reads like the wo
 - **Contact** — a slate-styled enquiry form, copy-to-clipboard email and a live Yerevan clock.
 - **Departure** — a scroll-drawn flight path to Yerevan under a line-drawn Ararat, a boarding pass whose stub tears off, and the AM stamp.
 - **End credits** — then the wordmark and the exact dedication: “A gift From Bro” / “happy emigration”.
+
+Palette: warm off-blacks, a paper tone for the manifesto, about, packages and journal, and one red used sparingly. Type: Archivo at a wide stretch in sentence case, with Instrument Serif italics.
 
 Four complete UI languages (English, Persian, Armenian, Russian) with flag transitions, RTL layout for Persian and script-specific type. Lenis smooth scrolling drives GSAP ScrollTrigger. Sound begins only when a visitor turns it on. WebGL canvases are created lazily and pause off screen. With reduced motion, the leader, pinning, scrubbing and cursor are off and every section renders as a static, fully readable page.
 
