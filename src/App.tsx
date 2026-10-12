@@ -212,7 +212,7 @@ function Marquee({ items, reduced }: { items: string[]; reduced: boolean }) {
     return () => cancelAnimationFrame(frame)
   }, [reduced])
   const doubled = [...items, ...items, ...items, ...items]
-  return <div className="marquee" aria-label={items.join(', ')} dir="ltr">
+  return <div className="marquee theme-paper" aria-label={items.join(', ')} dir="ltr">
     {[0].map(row => <div className={`marquee-row ${row ? 'is-outline' : ''}`} key={row} ref={el => { rows.current[row] = el }} aria-hidden="true">
       {doubled.map((item, i) => <span key={i}>{item}<i className={i % 2 ? 'star' : 'disc'} /></span>)}
     </div>)}
@@ -541,7 +541,7 @@ function Contact({ copy, language }: { copy: Copy; language: Language }) {
   const copyEmail = async () => {
     try { await navigator.clipboard.writeText('hello@izmab.studio'); setCopied(true); window.setTimeout(() => setCopied(false), 1600) } catch { /* clipboard unavailable */ }
   }
-  return <section id="contact" className="contact section">
+  return <section id="contact" className="contact section theme-paper">
     <div className="label" data-reveal>{copy.sections[7]}</div>
     <h2 className="contact-heading" data-lines><Lines lines={copy.contactHeading} accent={1} /></h2>
     <div className="contact-grid">
