@@ -220,18 +220,32 @@ void main(){
 
 export const SCENE_COUNT = 6
 
-export default function SceneCanvas({ scene, montage = false, reduced, className = '' }: { scene: number; montage?: boolean; reduced: boolean; className?: string }) {
+export default function SceneCanvas({ scene, montage = false, reduced, className = '', delay = 1200 }: { scene: number; montage?: boolean; reduced: boolean; className?: string; delay?: number }) {
   const host = useRef<HTMLDivElement>(null)
   const api = useRef<{ go: (to: number, fast?: boolean) => void } | null>(null)
 
+  // Build the renderer in idle time after load (or as soon as the stage comes near), never in the middle of a scroll:
+  // compiling this shader on the main thread used to freeze the page while the visitor was passing the manifesto.
   const [near, setNear] = useState(false)
   useEffect(() => {
     const node = host.current
     if (!node || near) return
-    const io = new IntersectionObserver(entries => { if (entries[0]?.isIntersecting) { setNear(true); io.disconnect() } }, { rootMargin: '100% 0px 100% 0px' })
+    const wake = () => setNear(true)
+    const io = new IntersectionObserver(entries => { if (entries[0]?.isIntersecting) wake() }, { rootMargin: '250% 0px 250% 0px' })
     io.observe(node)
-    return () => io.disconnect()
-  }, [near])
+    let idle = 0, timer = 0
+    const schedule = () => {
+      timer = window.setTimeout(() => {
+        if (typeof window.requestIdleCallback === 'function') idle = window.requestIdleCallback(wake, { timeout: 3000 })
+        else timer = window.setTimeout(wake, 200)
+      }, delay)
+    }
+    if (document.readyState === 'complete') schedule(); else window.addEventListener('load', schedule, { once: true })
+    return () => {
+      io.disconnect(); window.clearTimeout(timer); window.removeEventListener('load', schedule)
+      if (idle) window.cancelIdleCallback(idle)
+    }
+  }, [near, delay])
 
   useEffect(() => {
     const node = host.current
@@ -252,8 +266,8 @@ export default function SceneCanvas({ scene, montage = false, reduced, className
     const sceneGraph = new THREE.Scene()
     sceneGraph.add(new THREE.Mesh(geometry, material))
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
-    let visible = true, frame = 0, last = 0
-    const render = () => renderer.render(sceneGraph, camera)
+    let visible = true, frame = 0, last = 0, compiled = false
+    const render = () => { if (compiled) renderer.render(sceneGraph, camera) }
     const resize = () => {
       const rect = node.getBoundingClientRect()
       if (!rect.width || !rect.height) return
@@ -293,9 +307,16 @@ export default function SceneCanvas({ scene, montage = false, reduced, className
       uniforms.uTime.value = 3 + now * .001
       render()
     }
-    resize()
-    if (reduced) render(); else frame = requestAnimationFrame(tick)
+    let disposed = false
+    // Compile off the main thread where KHR_parallel_shader_compile exists; draw only once the program is ready.
+    void renderer.compileAsync(sceneGraph, camera).catch(() => undefined).then(() => {
+      if (disposed) return
+      compiled = true
+      resize()
+      if (reduced) render(); else frame = requestAnimationFrame(tick)
+    })
     return () => {
+      disposed = true
       cancelAnimationFrame(frame); io.disconnect(); ro.disconnect(); tween?.kill()
       window.removeEventListener('pointermove', onPointer)
       geometry.dispose(); material.dispose(); renderer.dispose(); renderer.domElement.remove(); api.current = null
