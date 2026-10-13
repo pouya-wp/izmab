@@ -14,16 +14,17 @@ Every section borrows a piece of film-making, so the portfolio reads like the wo
 - **Reel** — a frame that grows from a small card to full bleed as you scroll, playing a rapid-cut teaser montage of the six scenes; stats roll in as odometers (Latin and Persian digits).
 - **About: the grade** — a project frame flat in LOG and graded side by side; drag the split and pick a look (Rec.709, Kodak 2383, bleach bypass, noir).
 - **Process: stopping down** — a seven-blade aperture with individually lit blades that closes from f/1.4 to f/11 through Brief → Prep → Shoot → Finish; the portrait seen through it darkens as it stops down, and an aperture scale tracks the stop.
+- **Already have content?** — an offer to edit visitors' own video, images and graphics, quoted on request (no price).
 - **Packages as slates** — three clapperboards that clap shut on hover. Prices in US dollars with the Armenian dram equivalent at today's rate (open.er-api.com, cached per session, approximate fallback offline) and a USD/AMD switch.
 - **Journal** — hover previews that follow the cursor, each a small illustration of the article's idea.
 - **Feed as a contact sheet** — two counter-scrolling film strips with grease-pencil selects.
-- **Studio** — IZMAB as a registered company in the Republic of Armenia, based in Yerevan: services, working languages, invoicing in AMD/USD and a live Yerevan clock.
+- **Next stop: Yerevan** — a studio already in love with Armenia and on its way there: services, who it wants to work with, working languages and a live Yerevan clock.
 - **Contact** — an enquiry form and copy-to-clipboard email.
 - **End credits** — then the wordmark.
 
 Palette: warm off-blacks, a paper tone for the manifesto, about, packages and journal, and one red used sparingly. Type: Archivo at a wide stretch in sentence case, with Instrument Serif italics. Persian headlines use PARADOX and its accents PARADOX LINE (`public/fonts/`), with Vazirmatn for body text.
 
-Four complete UI languages (English, Persian, Armenian, Russian) with flag transitions, RTL layout for Persian and script-specific type. Lenis smooth scrolling drives GSAP ScrollTrigger. Sound begins only when a visitor turns it on. WebGL canvases are created lazily and pause off screen. With reduced motion, the leader, pinning, scrubbing and cursor are off and every section renders as a static, fully readable page.
+Four complete UI languages (English, Persian, Armenian, Russian) with flag transitions, RTL layout for Persian and script-specific type. Lenis smooth scrolling drives GSAP ScrollTrigger. Sound (`src/useSoundDesign.ts`) is modelled on a product-film mix: pitched bubble pops on hover, crisp ticks for clicks and typing, an air whoosh that follows scroll speed, tick cascades as lists land, whooshes between sections, detent clicks on the aperture ring, a warm mid-range pad and a glassy impact with shimmer for big moments — all synthesised, through reverb and a compressor, panned by screen position. It starts only when the visitor turns it on; a prompt after the intro invites them to. WebGL canvases are created lazily and pause off screen. With reduced motion, the leader, pinning, scrubbing and cursor are off and every section renders as a static, fully readable page.
 
 ## Run locally
 
@@ -41,7 +42,7 @@ Open the local URL printed by Vite. For a production build, run `pnpm build`.
 - PARADOX and PARADOX LINE are commercial fonts from fontiran.com; confirm the web licence covers this site.
 - Confirm the copy, stats, prices, availability date and `hello@izmab.studio` address. These values came from the original mockup.
 - Connect the booking form to a real endpoint if enquiries should be sent inside the site. It currently opens the visitor's email app with a prepared message; it does not claim to send data itself.
-- Confirm the studio facts (registered company in Armenia, services, AMD/USD invoicing) and the USD prices in `src/App.tsx` / `src/i18n-extra.ts`. The stills in `public/stills/` are generative stand-ins for real project frames.
+- Confirm the Yerevan section copy and the USD prices in `src/App.tsx` / `src/i18n-extra.ts`. The stills in `public/stills/` are generative stand-ins for real project frames.
 - Add article pages and social URLs when their real content and destinations are available. The current journal and feed keep the mockup layout without dead links.
 
 The design respects reduced motion settings, supports keyboard focus, and keeps the work stage, process and departure scenes usable on narrow screens.
