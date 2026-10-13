@@ -1,4 +1,3 @@
-Interface sounds: SND (https://snd.dev) by Dentsu Inc. — kits SND02 and SND03, distributed in the
-snd-lib package (https://github.com/snd-lib/snd-lib). The audio may be used free of charge; copyright
-and all other rights in the audio belong to the credited sound designers (see https://snd.dev/).
-Selected sounds were trimmed and combined into izmab-sfx.mp3 for this site.
+Interface sounds: uisfx (https://uisfx.com, https://github.com/romainsimon/uisfx) — Glass, Dreamy and
+Minimal packs. The audio is dedicated to the public domain under CC0 1.0. Selected sounds were trimmed,
+high-passed and levelled, then combined into izmab-sfx.mp3 for this site.
