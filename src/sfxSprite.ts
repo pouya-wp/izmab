@@ -1,0 +1,31 @@
+// Offsets and lengths (seconds) of each sound in public/sfx/izmab-sfx.mp3.
+// Sounds from SND by Dentsu (https://snd.dev): kit SND02 for the interface, kit SND03 taps (mech_*) for the aperture ring.
+export const SFX_SPRITE: Record<string, [number, number]> = {
+  'tap_01': [0.0, 0.1962],
+  'tap_02': [0.3162, 0.214],
+  'tap_03': [0.6502, 0.2344],
+  'tap_04': [1.0046, 0.1918],
+  'tap_05': [1.3164, 0.2199],
+  'select': [1.6563, 0.2606],
+  'button': [2.037, 0.5513],
+  'toggle_on': [2.7083, 0.5166],
+  'toggle_off': [3.3449, 0.55],
+  'type_01': [4.0149, 0.5014],
+  'type_02': [4.6363, 0.5007],
+  'type_03': [5.257, 0.5001],
+  'type_04': [5.8771, 0.5001],
+  'type_05': [6.4972, 0.5],
+  'swipe_01': [7.1173, 0.2091],
+  'swipe_02': [7.4464, 0.2306],
+  'swipe_03': [7.7969, 0.2304],
+  'swipe_04': [8.1473, 0.2396],
+  'swipe_05': [8.507, 0.1963],
+  'transition_up': [8.8232, 0.7503],
+  'transition_down': [9.6935, 0.7503],
+  'celebration': [10.5638, 3.0012],
+  'mech_tap_01': [13.685, 0.03],
+  'mech_tap_02': [13.835, 0.0306],
+  'mech_tap_03': [13.9856, 0.0302],
+  'mech_tap_04': [14.1358, 0.034],
+  'mech_tap_05': [14.2898, 0.0371]
+}

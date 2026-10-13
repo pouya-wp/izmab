@@ -33,7 +33,7 @@ export const Iris = forwardRef<IrisHandle, { label: string }>(function Iris({ la
     }
     edges.current?.setAttribute('d', lines)
     rim.current?.setAttribute('d', v.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join('') + 'Z')
-    shade.current?.setAttribute('opacity', String((1 - open) * .62))
+    shade.current?.setAttribute('opacity', String((1 - open) * .34))
   }
   useImperativeHandle(ref, () => ({ setOpen }))
   useEffect(() => { setOpen(1) }, [])
@@ -43,6 +43,14 @@ export const Iris = forwardRef<IrisHandle, { label: string }>(function Iris({ la
       <clipPath id="iris-clip"><circle cx={C} cy={C} r={R} /></clipPath>
       <radialGradient id="iris-depth" cx="50%" cy="50%" r="50%"><stop offset=".55" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".55" /></radialGradient>
       <linearGradient id="iris-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".16" /><stop offset=".38" stopColor="#fff" stopOpacity="0" /><stop offset=".8" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#fff" stopOpacity=".05" /></linearGradient>
+      {/* A touch of bokeh softness and fine moving grain on the scene behind the blades. */}
+      <filter id="iris-bokeh" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3.2" /><feComponentTransfer><feFuncR type="linear" slope="1.35" /><feFuncG type="linear" slope="1.3" /><feFuncB type="linear" slope="1.3" /></feComponentTransfer></filter>
+      <filter id="iris-grain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="2" seed="2" stitchTiles="stitch">
+          <animate attributeName="seed" values="1;2;3;4;5;6;7;8" dur="0.5s" repeatCount="indefinite" />
+        </feTurbulence>
+        <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 -.18" />
+      </filter>
       <linearGradient id="iris-barrel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#2a2724" /><stop offset=".5" stopColor="#121110" /><stop offset="1" stopColor="#1c1a18" /></linearGradient>
     </defs>
     <circle cx={C} cy={C} r={197} fill="url(#iris-barrel)" />
@@ -50,7 +58,8 @@ export const Iris = forwardRef<IrisHandle, { label: string }>(function Iris({ la
     <circle cx={C} cy={C} r={170} fill="#0b0a09" />
     <circle cx={C} cy={C} r={R + 4} fill="none" stroke="rgba(236,230,220,.14)" strokeWidth="1" />
     <g clipPath="url(#iris-clip)">
-      <image href="/stills/lens.jpg" x={C - R} y={C - R} width={R * 2} height={R * 2} preserveAspectRatio="xMidYMid slice" />
+      <image href="/stills/lens.jpg" x={C - R - 8} y={C - R - 8} width={R * 2 + 16} height={R * 2 + 16} preserveAspectRatio="xMidYMid slice" filter="url(#iris-bokeh)" />
+      <rect x={C - R} y={C - R} width={R * 2} height={R * 2} filter="url(#iris-grain)" opacity=".35" style={{ mixBlendMode: 'overlay' }} />
       <circle ref={shade} cx={C} cy={C} r={R} fill="#000" opacity="0" />
       {Array.from({ length: N }, (_, i) => <polygon key={i} ref={el => { blades.current[i] = el }} />)}
       <circle cx={C} cy={C} r={R} fill="url(#iris-depth)" />
