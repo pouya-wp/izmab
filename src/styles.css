@@ -315,6 +315,26 @@ html.hdr-light:not(.menu-open) .hdr .pill-menu:hover{background:var(--accent);bo
 .theme-paper .slate-cta:hover{color:var(--paper)}
 .is-featured .slate-cta:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 
+.edit-offer{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;gap:clamp(20px,3vw,48px);align-items:center;margin-top:clamp(28px,5vh,52px);padding:clamp(22px,2.6vw,38px);border:1px dashed var(--faint);border-radius:6px}
+.edit-offer h3{font:500 clamp(26px,2.4vw,40px)/1 var(--sans);font-stretch:112%;letter-spacing:-.04em}
+.edit-offer p{margin-top:12px;max-width:46ch;font:400 15.5px/1.6 var(--sans);color:var(--muted)}
+.edit-offer-list{display:flex;flex-wrap:wrap;gap:8px}
+.edit-offer-list li{padding:8px 13px;border:1px solid var(--line);border-radius:999px;font:500 13px/1 var(--sans)}
+.edit-offer-foot{display:grid;gap:12px;justify-items:end}
+.edit-offer-foot .slate-cta{margin-top:0;min-width:210px}
+[dir=rtl] .edit-offer-foot{justify-items:start}
+
+/* ───── sound prompt ───── */
+.sound-prompt{position:fixed;left:50%;bottom:22px;z-index:130;display:flex;align-items:center;gap:12px;padding:8px 8px 8px 16px;border-radius:999px;background:rgba(23,21,19,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(236,230,220,.14);color:#ece6dc;font:500 13.5px/1 var(--sans);translate:-50% 140%;opacity:0;transition:translate .8s var(--ease),opacity .5s;pointer-events:none}
+.sound-prompt.is-on{translate:-50% 0;opacity:1;pointer-events:auto}
+.sound-prompt button{padding:9px 14px;border-radius:999px;background:#f3eee6;color:var(--paper-ink);font:500 13px/1 var(--sans);transition:background .3s,color .3s}
+.sound-prompt button:hover{background:var(--accent);color:#fff}
+.sound-prompt .sound-prompt-x{padding:9px 11px;background:transparent;color:rgba(236,230,220,.6)}
+.sound-prompt-wave{display:flex;align-items:center;gap:2px;height:14px}
+.sound-prompt-wave i{width:2px;height:4px;border-radius:1px;background:var(--accent);animation:bars .7s ease-in-out infinite alternate}
+.sound-prompt-wave i:nth-child(2){animation-delay:.12s}.sound-prompt-wave i:nth-child(3){animation-delay:.24s}.sound-prompt-wave i:nth-child(4){animation-delay:.08s}.sound-prompt-wave i:nth-child(5){animation-delay:.3s}
+.lang-fa .sound-prompt,.lang-fa .sound-prompt button{font-family:Vazirmatn,sans-serif}
+
 /* ───── journal ───── */
 .theme-paper.pricing{padding-bottom:clamp(50px,8vh,90px)}
 .theme-paper.journal{padding-top:clamp(50px,8vh,90px)}
@@ -402,8 +422,8 @@ a.detail-big:hover{color:var(--accent)}
 
 /* ───── scripts ───── */
 .lang-fa{font-family:Vazirmatn,Tahoma,sans-serif}
-.lang-fa :is(.studio-fact dd,.studio-body,.grade-looks button,.price-alt,.price-per,.price-from,.currency button,.label,.pill,.hero-kicker,.manifesto-aside,.work-index-title,.work-meta,.about-prose,.skills li,.process-current p,.process-step-name,.slate ul,.slate-cta,.journal-row h3,.contact-form input,.action,.credit span,.footer-bottom,.reel-note,.hdr-status,.cursor-disc span,.form-note,.eyebrow){font-family:Vazirmatn,'Noto Sans Armenian',Tahoma,sans-serif;letter-spacing:0}
-.lang-fa :is(.price-main,.studio-fact.is-time dd,.display,.section-title,.hero-line,.contact-heading,.process-current h3,.slate h3,.manifesto-text,.marquee-row span,.reel-words,.menu-link,.menu-stage-title,.process-all h3,.credit strong,.detail-big,.stat strong,.process-num,.slate-price,.lens-readout strong,.language-transition-word){font-family:Archivo,'Paradox','Noto Sans Armenian',Vazirmatn,sans-serif;font-weight:400;font-stretch:112%;letter-spacing:0;word-spacing:.04em}
+.lang-fa :is(.edit-offer p,.edit-offer-list li,.studio-fact dd,.studio-body,.grade-looks button,.price-alt,.price-per,.price-from,.currency button,.label,.pill,.hero-kicker,.manifesto-aside,.work-index-title,.work-meta,.about-prose,.skills li,.process-current p,.process-step-name,.slate ul,.slate-cta,.journal-row h3,.contact-form input,.action,.credit span,.footer-bottom,.reel-note,.hdr-status,.cursor-disc span,.form-note,.eyebrow){font-family:Vazirmatn,'Noto Sans Armenian',Tahoma,sans-serif;letter-spacing:0}
+.lang-fa :is(.edit-offer h3,.price-main,.studio-fact.is-time dd,.display,.section-title,.hero-line,.contact-heading,.process-current h3,.slate h3,.manifesto-text,.marquee-row span,.reel-words,.menu-link,.menu-stage-title,.process-all h3,.credit strong,.detail-big,.stat strong,.process-num,.slate-price,.lens-readout strong,.language-transition-word){font-family:Archivo,'Paradox','Noto Sans Armenian',Vazirmatn,sans-serif;font-weight:400;font-stretch:112%;letter-spacing:0;word-spacing:.04em}
 .lang-fa :is(.hero-line,.display,.manifesto-text,.contact-heading){line-height:1.12}
 .lang-fa .manifesto-text{line-height:1.22;font-size:clamp(32px,4.4vw,78px)}
 .lang-fa .serif{font-family:'Paradox Line','Paradox',Vazirmatn,sans-serif;font-style:normal;font-weight:400;letter-spacing:0}
@@ -445,6 +465,7 @@ a.detail-big:hover{color:var(--accent)}
   .process-grid{gap:16px}
   .process-lens{--lens:min(66vw,34vh);grid-row:1}
   .grade{max-width:560px}
+  .edit-offer{grid-template-columns:1fr}.edit-offer-foot{justify-items:start}
   .studio-fact{grid-template-columns:1fr;gap:6px}
   .process-current{min-height:0}
   .process-num{font-size:clamp(56px,14vw,100px)}

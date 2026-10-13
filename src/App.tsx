@@ -16,7 +16,7 @@ import { projects, posts } from './data'
 gsap.registerPlugin(ScrollTrigger)
 
 type Copy = LocaleText & ExtraText
-type Play = (cue: SoundCue) => void
+type Play = (cue: SoundCue, options?: { x?: number; pitch?: number; count?: number }) => void
 const asset = (name: string) => `/${name}`
 const menuIds = ['work', 'reel', 'about', 'process', 'pricing', 'journal', 'contact']
 const ratios = [2.39, 4 / 5, 16 / 9, 9 / 16, 3 / 2, 16 / 9]
@@ -78,7 +78,7 @@ function Header({ copy, language, setLanguage, soundEnabled, toggleSound, play, 
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
-  const close = () => { setOpen(false); play('transition') }
+  const close = () => { setOpen(false); play('close') }
   return <>
     <header className="hdr">
       <a className="hdr-logo" href="#top" aria-label="IZMAB"><span>IZMAB</span></a>
@@ -93,7 +93,7 @@ function Header({ copy, language, setLanguage, soundEnabled, toggleSound, play, 
         <button className={`pill pill-sound ${soundEnabled ? 'is-on' : ''}`} type="button" onClick={toggleSound} aria-label={soundEnabled ? copy.soundOn : copy.soundOff} aria-pressed={soundEnabled}>
           <span className="sound-bars" aria-hidden="true"><i /><i /><i /><i /></span><span className="pill-word">{copy.soundLabel}</span>
         </button>
-        <button ref={button} className={`pill pill-menu ${open ? 'is-open' : ''}`} type="button" onClick={() => { setOpen(value => !value); play('transition') }} aria-expanded={open} aria-controls="site-menu" data-magnetic>
+        <button ref={button} className={`pill pill-menu ${open ? 'is-open' : ''}`} type="button" onClick={() => { setOpen(value => { play(value ? 'close' : 'open'); return !value }) }} aria-expanded={open} aria-controls="site-menu" data-magnetic>
           <span>{open ? copy.close : copy.menu}</span><span className="burger" aria-hidden="true"><i /><i /></span>
         </button>
       </div>
@@ -331,7 +331,7 @@ function Reel({ copy, reduced }: { copy: Copy; reduced: boolean }) {
         </div>
       </div>
     </div>
-    <div className="stats" ref={stats}>{copy.stats.map((label, index) => <div className="stat" key={index}>
+    <div className="stats" ref={stats} data-cascade="4">{copy.stats.map((label, index) => <div className="stat" key={index}>
       <strong><Odometer value={copy.statValues[index]} run={counted || reduced} /></strong><span className="label">{label}</span>
     </div>)}</div>
   </section>
@@ -373,7 +373,7 @@ function About({ copy, reduced }: { copy: Copy; reduced: boolean }) {
         <div className="label" data-reveal>{copy.sections[2]}</div>
         <h2 className="display" data-lines><Lines lines={copy.aboutHeading} accent={1} /></h2>
         <div className="about-prose" data-reveal>{copy.aboutParagraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
-        <ul className="skills" data-reveal>{copy.skills.map(skill => <li key={skill}>{skill}</li>)}</ul>
+        <ul className="skills" data-reveal data-cascade="6">{copy.skills.map(skill => <li key={skill}>{skill}</li>)}</ul>
       </div>
       <figure className="grade" data-reveal>
         <div className="grade-frame" ref={frame} dir="ltr" data-cursor data-cursor-label="⟷">
@@ -385,7 +385,7 @@ function About({ copy, reduced }: { copy: Copy; reduced: boolean }) {
         </div>
         <figcaption>
           <div className="grade-looks" role="group" aria-label={copy.gradeLabel} dir="ltr">
-            {looks.map((item, i) => <button type="button" key={item.name} className={i === look ? 'is-active' : ''} aria-pressed={i === look} onClick={() => setLook(i)}>{item.name}</button>)}
+            {looks.map((item, i) => <button type="button" key={item.name} className={i === look ? 'is-active' : ''} aria-pressed={i === look} onClick={() => setLook(i)} data-sfx>{item.name}</button>)}
           </div>
           <span className="label">{copy.gradeHint}</span>
         </figcaption>
@@ -398,7 +398,10 @@ function About({ copy, reduced }: { copy: Copy; reduced: boolean }) {
 
 const processStops = ['1.4', '2.8', '5.6', '11']
 const scaleStops = ['1.4', '2', '2.8', '4', '5.6', '8', '11', '16']
-function Process({ copy, reduced }: { copy: Copy; reduced: boolean }) {
+function Process({ copy, reduced, play }: { copy: Copy; reduced: boolean; play: Play }) {
+  const playRef = useRef(play)
+  playRef.current = play
+  const detent = useRef(0)
   const wrap = useRef<HTMLElement>(null)
   const iris = useRef<IrisHandle>(null)
   const bars = useRef<(HTMLSpanElement | null)[]>([])
@@ -411,6 +414,9 @@ function Process({ copy, reduced }: { copy: Copy; reduced: boolean }) {
       const p = Math.min(.999, self.progress)
       iris.current?.setOpen(1 - p * .86)
       if (marker.current) marker.current.style.insetInlineStart = `${(p * 6) / 7 * 100}%`
+      // A detent click for every stop the ring passes, like a real aperture ring.
+      const stopIndex = Math.round(p * 6)
+      if (stopIndex !== detent.current) { detent.current = stopIndex; const rect = marker.current?.getBoundingClientRect(); playRef.current('detent', { x: rect ? rect.left : innerWidth * .7 }) }
       bars.current.forEach((bar, i) => { if (bar) bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p * 4 - i))})` })
       const i = Math.floor(p * 4)
       if (i !== last.current) { last.current = i; setActive(i) }
@@ -496,7 +502,7 @@ function Pricing({ copy, play, language }: { copy: Copy; play: Play; language: L
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
   const num = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 })
   const amd = (value: number) => `${num.format(Math.round(value * rate.value / 1000) * 1000)} ֏`
-  const note = copy.rateNote.replace('{rate}', `${rate.live ? '' : '≈ '}${num.format(Math.round(rate.value))}`)
+  const note = `${rate.live ? '' : '≈ '}${copy.rateNote.replace('{rate}', num.format(Math.round(rate.value)))}`
   return <section id="pricing" className="pricing section theme-paper">
     <div className="section-head" data-reveal>
       <h2 className="section-title">{copy.sections[4]}</h2>
@@ -505,7 +511,7 @@ function Pricing({ copy, play, language }: { copy: Copy; play: Play; language: L
         <span className="currency-thumb" style={{ transform: `translateX(${currency === 'USD' ? 0 : 100}%)` }} />
       </div>
     </div>
-    <div className={`slates ${seen ? 'is-seen' : ''}`} ref={ref}>
+    <div className={`slates ${seen ? 'is-seen' : ''}`} ref={ref} data-cascade="3">
       {copy.plans.map((plan, index) => {
         const main = currency === 'USD' ? usd.format(planUsd[index]) : amd(planUsd[index])
         const alt = currency === 'USD' ? amd(planUsd[index]) : usd.format(planUsd[index])
@@ -529,6 +535,17 @@ function Pricing({ copy, play, language }: { copy: Copy; play: Play; language: L
       })}
     </div>
     <p className="price-note label" data-reveal>{note} · {copy.plansNote}</p>
+    <div className="edit-offer" data-reveal>
+      <div className="edit-offer-copy">
+        <h3>{copy.editTitle}</h3>
+        <p>{copy.editBody}</p>
+      </div>
+      <ul className="edit-offer-list" data-cascade="5">{copy.editItems.map(item => <li key={item}>{item}</li>)}</ul>
+      <div className="edit-offer-foot">
+        <span className="label">{copy.editQuote}</span>
+        <a className="slate-cta" href="#contact" data-magnetic><span>{copy.editCta}</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
   </section>
 }
 
@@ -548,7 +565,7 @@ function Journal({ copy, language }: { copy: Copy; language: Language }) {
   }, [])
   return <section id="journal" className="journal section theme-paper">
     <div className="section-head" data-reveal><h2 className="section-title">{copy.sections[5]}</h2></div>
-    <div className="journal-list" onPointerLeave={() => setHover(-1)}>
+    <div className="journal-list" data-cascade="3" onPointerLeave={() => setHover(-1)}>
       {posts.map((post, index) => <article className={`journal-row ${hover === index ? 'is-hover' : ''}`} key={index} data-reveal onPointerEnter={() => setHover(index)} data-cursor data-cursor-label="Read">
         <span className="label">{dateFormat.format(new Date(`${postDates[index]}T00:00:00Z`))}</span>
         <h3>{copy.postTitles[index]}</h3>
@@ -600,7 +617,7 @@ function Feed({ copy, reduced }: { copy: Copy; reduced: boolean }) {
 
 /* ───────────────────────────── Contact: the slate ───────────────────────────── */
 
-function Contact({ copy }: { copy: Copy }) {
+function Contact({ copy, play }: { copy: Copy; play: Play }) {
   const [status, setStatus] = useState('')
   const [copied, setCopied] = useState(false)
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -609,6 +626,7 @@ function Contact({ copy }: { copy: Copy }) {
     const values = new FormData(event.currentTarget)
     const body = copy.fields.map((field, index) => `${field}: ${values.get(['name', 'email', 'project', 'dates'][index]) || ''}`).join('\n')
     setStatus(copy.emailPrepared)
+    play('impact')
     window.location.href = `mailto:hello@izmab.studio?subject=${encodeURIComponent('IZMAB — project enquiry')}&body=${encodeURIComponent(body)}`
   }
   const copyEmail = async () => {
@@ -620,7 +638,7 @@ function Contact({ copy }: { copy: Copy }) {
     <div className="contact-grid">
       <div className="contact-details" data-reveal>
         <div className="detail"><span className="label">Email</span><span className="detail-row"><a href="mailto:hello@izmab.studio" className="detail-big">hello@izmab.studio</a><button type="button" className="pill" onClick={copyEmail} aria-live="polite">{copied ? copy.copied : copy.copy}</button></span></div>
-        <div className="detail"><span className="label">{copy.studio}</span><span className="detail-big">{copy.studioFacts[1][1]}</span></div>
+        <div className="detail"><span className="label">{copy.studio}</span><span className="detail-big">{copy.studioFacts[0][1]}</span></div>
         <div className="detail"><span className="label">{copy.available}</span><span className="detail-big">{copy.nextOpening}</span></div>
       </div>
       <form className="contact-form" onSubmit={submit} data-reveal>
@@ -655,7 +673,7 @@ function Studio({ copy, language, reduced }: { copy: Copy; language: Language; r
         <p className="studio-body" data-reveal>{copy.studioBody}</p>
         <div className="studio-coords label" data-reveal dir="ltr"><span className="studio-pin" />40°10′45″N · 44°29′57″E</div>
       </div>
-      <dl className="studio-facts" data-reveal>
+      <dl className="studio-facts" data-reveal data-cascade="6">
         <div className="studio-fact is-time"><dt className="label">{copy.localTime}</dt><dd><ZoneClock zone="Asia/Yerevan" locale={languageTags[language]} /></dd></div>
         {copy.studioFacts.map(([term, value]) => <div className="studio-fact" key={term}><dt className="label">{term}</dt><dd>{value}</dd></div>)}
       </dl>
@@ -772,6 +790,23 @@ export default function App() {
     return () => { cancelAnimationFrame(frame); document.documentElement.classList.remove('hdr-light') }
   }, [])
 
+  // Sound that follows the page: a whoosh as each section arrives, tick cascades as lists land.
+  const playRef = useRef(sound.play)
+  playRef.current = sound.play
+  useEffect(() => {
+    const sections = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) playRef.current('transition', { x: innerWidth / 2 }) }), { rootMargin: '-45% 0px -45% 0px' })
+    document.querySelectorAll('main > section, main > div.marquee, footer').forEach(el => sections.observe(el))
+    const lists = new IntersectionObserver(entries => entries.forEach(entry => {
+      if (!entry.isIntersecting) return
+      const el = entry.target as HTMLElement
+      const rect = el.getBoundingClientRect()
+      playRef.current('cascade', { count: Number(el.dataset.cascade) || 4, x: rect.left + rect.width / 2 })
+      lists.unobserve(el)
+    }), { rootMargin: '0px 0px -25% 0px' })
+    document.querySelectorAll('[data-cascade]').forEach(el => lists.observe(el))
+    return () => { sections.disconnect(); lists.disconnect() }
+  }, [sound.enabled, language])
+
   // Magnetic controls lean toward the pointer.
   useEffect(() => {
     if (reduced || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
@@ -787,6 +822,16 @@ export default function App() {
     window.addEventListener('pointermove', move, { passive: true })
     return () => window.removeEventListener('pointermove', move)
   }, [reduced])
+
+  // After the intro, invite the visitor to turn sound on; it goes away on its own.
+  const [soundPrompt, setSoundPrompt] = useState(false)
+  useEffect(() => {
+    if (!started || reduced) return
+    const show = window.setTimeout(() => setSoundPrompt(true), 1400)
+    const hide = window.setTimeout(() => setSoundPrompt(false), 11000)
+    return () => { window.clearTimeout(show); window.clearTimeout(hide) }
+  }, [started, reduced])
+  useEffect(() => { if (sound.enabled) setSoundPrompt(false) }, [sound.enabled])
 
   const onLanguage = useCallback((value: Language) => {
     if (value === language || pendingLanguage) return
@@ -807,16 +852,22 @@ export default function App() {
         <Work copy={copy} reduced={reduced} play={sound.play} />
         <Reel copy={copy} reduced={reduced} />
         <About copy={copy} reduced={reduced} />
-        <Process copy={copy} reduced={reduced} />
+        <Process copy={copy} reduced={reduced} play={sound.play} />
         <Pricing copy={copy} play={sound.play} language={language} />
         <Journal copy={copy} language={language} />
         <Feed copy={copy} reduced={reduced} />
         <Studio copy={copy} language={language} reduced={reduced} />
-        <Contact copy={copy} />
+        <Contact copy={copy} play={sound.play} />
       </main>
       <Footer copy={copy} reduced={reduced} />
     </div>
     {!reduced && <SoftCursor />}
+    <div className={`sound-prompt lang-${language} ${soundPrompt ? 'is-on' : ''}`} dir={language === 'fa' ? 'rtl' : 'ltr'} aria-hidden={!soundPrompt}>
+      <span className="sound-prompt-wave" aria-hidden="true"><i /><i /><i /><i /><i /></span>
+      <span>{copy.soundPrompt}</span>
+      <button type="button" onClick={() => { void sound.toggle() }} tabIndex={soundPrompt ? 0 : -1}>{copy.soundPromptCta}</button>
+      <button type="button" className="sound-prompt-x" aria-label={copy.close} onClick={() => setSoundPrompt(false)} tabIndex={soundPrompt ? 0 : -1}>×</button>
+    </div>
     {!leaderGone && <Preloader label={copy.loading} skip={copy.skip} onOpen={onLeaderOpen} onDone={onLeaderDone} />}
     {pendingLanguage && <LanguageTransition from={transitionOrigin.current} to={pendingLanguage} commit={commitLanguage} finish={finishLanguage} reduced={reduced} />}
   </>
