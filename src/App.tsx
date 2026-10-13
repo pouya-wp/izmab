@@ -416,7 +416,7 @@ function Process({ copy, reduced, play }: { copy: Copy; reduced: boolean; play: 
       if (marker.current) marker.current.style.insetInlineStart = `${(p * 6) / 7 * 100}%`
       // A detent click for every stop the ring passes, like a real aperture ring.
       const stopIndex = Math.round(p * 6)
-      if (stopIndex !== detent.current) { detent.current = stopIndex; const rect = marker.current?.getBoundingClientRect(); playRef.current('key', { x: rect ? rect.left : innerWidth * .7 }) }
+      if (stopIndex !== detent.current) { detent.current = stopIndex; const rect = marker.current?.getBoundingClientRect(); playRef.current('detent', { x: rect ? rect.left : innerWidth * .7 }) }
       bars.current.forEach((bar, i) => { if (bar) bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p * 4 - i))})` })
       const i = Math.floor(p * 4)
       if (i !== last.current) { last.current = i; setActive(i) }
