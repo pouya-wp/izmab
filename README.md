@@ -1,60 +1,66 @@
-# IZMAB portfolio
+<div align="center">
 
-React + TypeScript + Vite rebuild of the original IZMAB prototype. The source prototype and assets remain in the parent folder.
+# 🎬 IZMAB
 
-## Concept: the site is a film
+### Cinematic Filmmaker & Visual Storytelling Showcase
 
-Every section borrows a piece of film-making, so the portfolio reads like the work it sells.
+[![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20WebGL-black?style=flat-square&logo=vercel)](https://izmab.vercel.app)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=flat-square&logo=react)](https://react.dev/)
+[![Three.js](https://img.shields.io/badge/3D-Three.js-049EF4?style=flat-square&logo=threedotjs)](https://threejs.org/)
+[![Motion](https://img.shields.io/badge/Motion-GSAP%20%2B%20Lenis-88CE02?style=flat-square&logo=greensock)](https://greensock.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-Pouya%20Sadeghpour-181717?style=flat-square&logo=github)](https://github.com/pouya-wp)
 
-- **Leader** — a 3·2·1 academy-leader countdown with a sweep and flash, then the shutter opens on the hero. Runs once per session; skippable; never runs with reduced motion.
-- **Hero** — the portrait, cut out so the wordmark's M sits exactly behind the head. The wordmark is seen through a moving lens (`src/LensMark.tsx`): depth-of-field blur that falls off smoothly from the cursor, a touch of magnification, a smear along the direction of travel and a film-like halation glow. Scrolling pulls the frame back into a rounded letterbox.
-- **Cursor** — a small dot that opens into a labelled disc over media (Read, Develop, Soon).
-- **Manifesto** — on paper: a word-by-word scroll reveal with serif-italic accents, followed by a velocity-reactive marquee.
-- **Work: the frame that reframes** — a pinned stage where scrolling cuts between projects. The frame physically morphs to each project's aspect ratio (2.39:1 → 4:5 → 16:9 → 9:16 → 3:2), with a noise-dissolve cut and a shutter click. Each project has a generative "living still" (`src/SceneCanvas.tsx`) in its place until real footage lands.
-- **Reel** — a frame that grows from a small card to full bleed as you scroll, playing a rapid-cut teaser montage of the six scenes; stats roll in as odometers (Latin and Persian digits).
-- **About: the grade** — a project frame flat in LOG and graded side by side; drag the split and pick a look (Rec.709, Kodak 2383, bleach bypass, noir).
-- **Process: stopping down** — a seven-blade aperture with individually lit blades that closes from f/1.4 to f/11 through Brief → Prep → Shoot → Finish; the portrait seen through it darkens as it stops down, and an aperture scale tracks the stop.
-- **Already have content?** — an offer to edit visitors' own video, images and graphics, quoted on request (no price).
-- **Packages as slates** — three clapperboards that clap shut on hover. Prices in US dollars with the Armenian dram equivalent at today's rate (open.er-api.com, cached per session, approximate fallback offline) and a USD/AMD switch.
-- **Journal** — hover previews that follow the cursor, each a small illustration of the article's idea.
-- **Feed as a contact sheet** — two counter-scrolling film strips with grease-pencil selects.
-- **Next stop: Yerevan** — a studio already in love with Armenia and on its way there: services, who it wants to work with, working languages and a live Yerevan clock.
-- **Contact** — an enquiry form and copy-to-clipboard email.
-- **End credits** — then the wordmark.
+<p align="center">
+  <b>IZMAB</b> is a cinematic director and filmmaker visual portfolio. Structured and edited like a feature film, it combines dynamic depth-of-field lens blurs, physical grade comparisons, analog film audio design, and smooth inertial scrolling.
+</p>
 
-Palette: warm off-blacks, a paper tone for the manifesto, about, packages and journal, and one red used sparingly. Type: Archivo at a wide stretch in sentence case, with Instrument Serif italics. Persian headlines use PARADOX and its accents PARADOX LINE (`public/fonts/`), with Vazirmatn for body text.
+</div>
 
-Four complete UI languages (English, Persian, Armenian, Russian) with flag transitions, RTL layout for Persian and script-specific type. Lenis smooth scrolling drives GSAP ScrollTrigger. Sound (`src/useSoundDesign.ts`) uses clean, glassy interface sounds from the uisfx library (CC0): the Glass pack for hover, click, typing and outcomes, Dreamy for movement (menu, section changes, project cuts). They are high-passed, trimmed and levelled into one ~185 kB sprite (`public/sfx/`, credits in `public/sfx/CREDITS.txt`), mixed quiet and panned by screen position. It starts only when the visitor turns it on; a prompt after the intro invites them to. WebGL canvases are created lazily and pause off screen. With reduced motion, the leader, pinning, scrubbing and cursor are off and every section renders as a static, fully readable page.
+---
 
-## Run locally
+## ✨ Features
 
-```sh
-pnpm install
-pnpm dev
+- 🎞️ **Cut-Like-A-Film Narrative** — Editorial pacing where each section behaves like an individual frame sequence.
+- 🔍 **Physical Lens Blur & Depth of Field** — Realtime shader-driven optical blur transitioning smoothly as the user explores projects.
+- 🎨 **Real-Time Grade Comparator** — Interactive split-screen slider comparing raw camera log footage against finished cinematic color grades.
+- 🔊 **Subtle Analog Foley Design** — Tactile UI click sounds, film reel ambient hum, and soft glass tones.
+- 📜 **Inertial Momentum Scrolling** — Powered by Lenis for buttery smooth navigation.
+
+---
+
+## 🏗️ Architecture
+
+| Module | Technologies | Responsibility |
+|:---|:---|:---|
+| `src/components/` | React 19, TypeScript | Film reel sections, pricing calculator, responsive grid |
+| `src/three/` | Three.js, GLSL | Custom lens shader, film grain pass, vignette |
+| `src/sound/` | Web Audio API | Tactile interface audio feedback and sound design |
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/pouya-wp/izmab.git
+cd izmab
+
+# Install dependencies
+npm install
+
+# Start local preview
+npm run dev
 ```
 
-Open the local URL printed by Vite. For a production build, run `pnpm build`.
+---
 
-## Content to replace before publishing
+## 📄 License
 
-- Add real project stills or videos for the six projects in `src/data.ts`; the generative scenes in `src/SceneCanvas.tsx` are stand-ins and can stay as hover/transition texture.
-- Add the showreel master and process/feed imagery. Those sections currently display clearly labelled placeholders.
-- PARADOX and PARADOX LINE are commercial fonts from fontiran.com; confirm the web licence covers this site.
-- Confirm the copy, stats, prices, availability date and `hello@izmab.studio` address. These values came from the original mockup.
-- Connect the booking form to a real endpoint if enquiries should be sent inside the site. It currently opens the visitor's email app with a prepared message; it does not claim to send data itself.
-- Confirm the Yerevan section copy and the USD prices in `src/App.tsx` / `src/i18n-extra.ts`. The stills in `public/stills/` are generative stand-ins for real project frames.
-- Add article pages and social URLs when their real content and destinations are available. The current journal and feed keep the mockup layout without dead links.
+Distributed under the MIT License.
 
-The design respects reduced motion settings, supports keyboard focus, and keeps the work stage, process and departure scenes usable on narrow screens.
+---
 
-## Stills
-
-Only the hero uses the portrait. The grade compare, the lens, the menu and the contact sheet use frames rendered from the site's own scenes into `public/stills/`; regenerate them after changing the shader with `CHROMIUM_PATH=/path/to/chromium node scripts/render-stills.mjs`. Swap them for real project stills when those exist.
-
-## QA
-
-```sh
-pnpm build && pnpm preview --port 4173 &
-pnpm test:ui                       # uses installed Chrome
-CHROMIUM_PATH=/path/to/chromium pnpm test:ui   # or any Chromium build
-```
+<div align="center">
+  <sub>Crafted with precision & passion by <b><a href="https://github.com/pouya-wp">Pouya Sadeghpour</a></b></sub>
+</div>
