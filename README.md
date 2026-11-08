@@ -8,6 +8,12 @@
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?style=flat-square&logo=react)](https://react.dev/)
 [![Three.js](https://img.shields.io/badge/3D-Three.js-049EF4?style=flat-square&logo=threedotjs)](https://threejs.org/)
 [![Motion](https://img.shields.io/badge/Motion-GSAP%20%2B%20Lenis-88CE02?style=flat-square&logo=greensock)](https://greensock.com/)
+<br/>
+
+<p align="center">
+  <img src="assets/preview.png" alt="IZMAB Cinematic Showcase Preview" width="100%" style="border-radius: 8px;" />
+</p>
+
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 [![Author](https://img.shields.io/badge/Author-Pouya%20Sadeghpour-181717?style=flat-square&logo=github)](https://github.com/pouya-wp)
 
